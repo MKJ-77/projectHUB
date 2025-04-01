@@ -1,14 +1,21 @@
 package com.example.projecthub.viewModel
 
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-class authViewModel: ViewModel() {
+class authViewModel(application: Application): AndroidViewModel(application) {
     private val auth : FirebaseAuth = FirebaseAuth.getInstance()
     private val _authState = MutableLiveData<AuthState>()
     val authState : LiveData<AuthState> = _authState
+
+    private val sharedPreferences: SharedPreferences =
+        application.getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+
 
     init {
         checkAuthStatus()
@@ -16,6 +23,9 @@ class authViewModel: ViewModel() {
 
     fun checkAuthStatus(){
         val user  = auth.currentUser
+
+        val isRemembered = sharedPreferences.getBoolean("RememberMe", false)
+
         if(user == null || !user.isEmailVerified){
             _authState.value = AuthState.Unauthenticated
         }else{
@@ -30,10 +40,6 @@ class authViewModel: ViewModel() {
             return
         }
 
-        if (!isValidEmail(email)) {
-            _authState.value = AuthState.Error("Invalid email format")
-            return
-        }
 
         _authState.value = AuthState.Loading
         auth.signInWithEmailAndPassword(email,password)
@@ -57,11 +63,6 @@ class authViewModel: ViewModel() {
 
         if (email.isEmpty()||password.isEmpty()){
             _authState.value = AuthState.Error("email or password missing")
-            return
-        }
-
-        if (!isValidEmail(email)) {
-            _authState.value = AuthState.Error("Invalid email format")
             return
         }
 
@@ -103,11 +104,16 @@ class authViewModel: ViewModel() {
 
     fun signout(){
         auth.signOut()
+        clearLoginSession()
         _authState.value = AuthState.Unauthenticated
     }
 
-    private fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    private fun saveLoginSession(rememberMe: Boolean) {
+        sharedPreferences.edit().putBoolean("RememberMe", rememberMe).apply()
+    }
+
+    private fun clearLoginSession() {
+        sharedPreferences.edit().remove("RememberMe").apply()
     }
 }
 

@@ -18,12 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.viewModel.AuthState
 import com.example.projecthub.viewModel.authViewModel
 
 @Composable
-fun homePage (modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel){
+fun homePage (modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel = viewModel()){
     val authState = authViewModel.authState.observeAsState()
     LaunchedEffect(authState.value) {
         when(authState.value){

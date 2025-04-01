@@ -29,15 +29,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.viewModel.AuthState
 import com.example.projecthub.viewModel.authViewModel
 
 @Composable
-fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel) {
+fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var  rememberMe by remember { mutableStateOf(false) }
+
+
 
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
@@ -142,7 +146,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                 )
 
                 Text(
-                    text = "Sign in to continue",
+                    text = "Log in to continue",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
@@ -211,6 +215,14 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                     )
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = rememberMe,
+                        onCheckedChange = { rememberMe = it }
+                    )
+                    Text(text = "Remember Me")
+                }
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(

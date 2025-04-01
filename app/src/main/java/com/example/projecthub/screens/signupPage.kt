@@ -29,12 +29,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.viewModel.AuthState
 import com.example.projecthub.viewModel.authViewModel
 
 @Composable
-fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel) {
+fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
