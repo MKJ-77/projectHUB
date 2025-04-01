@@ -15,7 +15,8 @@ class authViewModel: ViewModel() {
     }
 
     fun checkAuthStatus(){
-        if(auth.currentUser == null){
+        val user  = auth.currentUser
+        if(user == null || !user.isEmailVerified){
             _authState.value = AuthState.Unauthenticated
         }else{
             _authState.value = AuthState.Authenticated
@@ -29,13 +30,25 @@ class authViewModel: ViewModel() {
             return
         }
 
+        if (!isValidEmail(email)) {
+            _authState.value = AuthState.Error("Invalid email format")
+            return
+        }
+
         _authState.value = AuthState.Loading
         auth.signInWithEmailAndPassword(email,password)
             .addOnCompleteListener{task->
                 if (task.isSuccessful){
-                    _authState.value = AuthState.Authenticated
+                    val user = auth.currentUser
+                    if (user != null && user.isEmailVerified) {
+                        _authState.value = AuthState.Authenticated
+                    }else{
+                        _authState.value = AuthState.Error("Please verify your email before login")
+                        auth.signOut()
+                    }
                 }else{
                     _authState.value = AuthState.Error(task.exception?.message?:"Something went wrong")
+
                 }
             }
     }
@@ -47,11 +60,25 @@ class authViewModel: ViewModel() {
             return
         }
 
+        if (!isValidEmail(email)) {
+            _authState.value = AuthState.Error("Invalid email format")
+            return
+        }
+
         _authState.value = AuthState.Loading
         auth.createUserWithEmailAndPassword(email,password)
             .addOnCompleteListener{task->
                 if (task.isSuccessful){
-                    _authState.value = AuthState.Authenticated
+                    val user = auth.currentUser
+                    user?.sendEmailVerification()
+                        ?.addOnCompleteListener{verifyTask->
+                            if(verifyTask.isSuccessful){
+                                _authState.value = AuthState.Error("Verification email sent !Please verify your email.")
+                                auth.signOut()
+                            }else{
+                                _authState.value = AuthState.Error("failed to send email verification")
+                            }
+                        }
                 }else{
                     _authState.value = AuthState.Error(task.exception?.message?:"Something went wrong")
                 }
@@ -61,6 +88,10 @@ class authViewModel: ViewModel() {
     fun signout(){
         auth.signOut()
         _authState.value = AuthState.Unauthenticated
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 }
 
