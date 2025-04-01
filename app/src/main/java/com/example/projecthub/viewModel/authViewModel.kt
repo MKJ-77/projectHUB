@@ -85,6 +85,22 @@ class authViewModel: ViewModel() {
             }
     }
 
+    fun resendVerificationEmail(){
+        val user =  auth.currentUser
+        if(user != null && !user.isEmailVerified){
+            user.sendEmailVerification()
+                .addOnCompleteListener{task->
+                    if(task.isSuccessful){
+                        _authState.value = AuthState.Error("Verification email resent. Please check your email.")
+                    }else{
+                        _authState.value = AuthState.Error("Failed to resend email verification")
+                    }
+                }
+        }else{
+            _authState.value = AuthState.Error("User not found or already verified")
+        }
+    }
+
     fun signout(){
         auth.signOut()
         _authState.value = AuthState.Unauthenticated

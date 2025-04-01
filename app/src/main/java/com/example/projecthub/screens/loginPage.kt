@@ -29,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -94,6 +95,30 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
             Text("Login")
         }
         Spacer(modifier = Modifier.height(8.dp))
+
+        when(authState.value){
+            is AuthState.Error->{
+                val errorMessage = (authState as AuthState.Error).message
+                Text(text = errorMessage, color = Color.Red)
+                if (errorMessage.contains("verify your email", ignoreCase = true)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = { authViewModel.resendVerificationEmail() }) {
+                        Text("Resend Verification Email")
+                    }
+                }
+            }
+
+            is AuthState.Loading -> {
+                CircularProgressIndicator()
+            }
+
+            is AuthState.Authenticated -> {
+                LaunchedEffect(Unit) {
+                    navController.navigate("home_page")
+                }
+            }
+            else ->Unit
+        }
         TextButton(onClick = { navController.navigate("signup_page")}){
             Text("Dont have an account ? Sign Up")
 
