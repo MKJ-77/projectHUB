@@ -3,18 +3,7 @@ package com.example.projecthub.screens
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,29 +12,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +37,7 @@ import com.example.projecthub.viewModel.authViewModel
 fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
@@ -78,50 +50,245 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
         }
     }
 
-    Column(
+    val gradientColors = listOf(
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+        MaterialTheme.colorScheme.background
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(
+                brush = Brush.verticalGradient(colors = gradientColors)
+            )
+            .padding(16.dp)
     ) {
-        Text(text = "Login Page")
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Password") })
-        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 50.dp, y = (-30).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+        )
 
-        Button(onClick = { authViewModel.login(email, password) }) {
-            Text("Login")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .align(Alignment.BottomStart)
+                .offset(x = (-30).dp, y = 30.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+        )
 
-        when(authState.value){
-            is AuthState.Error->{
-                val errorMessage = (authState as AuthState.Error).message
-                Text(text = errorMessage, color = Color.Red)
-                if (errorMessage.contains("verify your email", ignoreCase = true)) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { authViewModel.resendVerificationEmail() }) {
-                        Text("Resend Verification Email")
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .align(Alignment.CenterStart)
+                .offset(x = (-70).dp, y = (-100).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.03f))
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .align(Alignment.Center)
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(24.dp)
+                ),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primaryContainer
+                                )
+                            )
+                        )
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Logo",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text(
+                    text = "Welcome Back",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Sign in to continue",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
+                )
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 1.dp
+                ) {
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Email, contentDescription = "Email")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateContentSize(),
+                        shape = RoundedCornerShape(12.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        )
+                    )
+                }
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 1.dp
+                ) {
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("Password") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Lock, contentDescription = "Password")
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateContentSize(),
+                        shape = RoundedCornerShape(12.dp),
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { authViewModel.login(email, password) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .shadow(8.dp, RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.tertiary
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Login",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                when(authState.value){
+                    is AuthState.Error -> {
+                        val errorMessage = (authState.value as AuthState.Error).message
+                        Text(text = errorMessage, color = Color.Red)
+                        if (errorMessage.contains("verify your email", ignoreCase = true)) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { authViewModel.resendVerificationEmail() }) {
+                                Text("Resend Verification Email")
+                            }
+                        }
+                    }
+
+                    is AuthState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+
+                    is AuthState.Authenticated -> {
+                        LaunchedEffect(Unit) {
+                            navController.navigate("home_page")
+                        }
+                    }
+                    else -> Unit
+                }
+
+                Row(
+                    modifier = Modifier.padding(top = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        "Don't have an account? ",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextButton(onClick = { navController.navigate("signup_page") }) {
+                        Text(
+                            "Sign Up",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
-
-            is AuthState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            is AuthState.Authenticated -> {
-                LaunchedEffect(Unit) {
-                    navController.navigate("home_page")
-                }
-            }
-            else ->Unit
         }
-        TextButton(onClick = { navController.navigate("signup_page")}){
-            Text("Dont have an account ? Sign Up")
-
     }
-}
 }
