@@ -36,7 +36,7 @@ class authViewModel(application: Application): AndroidViewModel(application) {
     fun login(email : String , password : String){
 
         if (email.isEmpty()||password.isEmpty()){
-            _authState.value = AuthState.Error("email or password missing")
+            _authState.value = AuthState.Error("Email or Password missing")
             return
         }
 
@@ -62,7 +62,7 @@ class authViewModel(application: Application): AndroidViewModel(application) {
     fun signup(email : String , password : String){
 
         if (email.isEmpty()||password.isEmpty()){
-            _authState.value = AuthState.Error("email or password missing")
+            _authState.value = AuthState.Error("Email or Password missing")
             return
         }
 
@@ -74,10 +74,10 @@ class authViewModel(application: Application): AndroidViewModel(application) {
                     user?.sendEmailVerification()
                         ?.addOnCompleteListener{verifyTask->
                             if(verifyTask.isSuccessful){
-                                _authState.value = AuthState.Error("Verification email sent !Please verify your email.")
+                                _authState.value = AuthState.Error("Verification email sent! Please verify your email.")
                                 auth.signOut()
                             }else{
-                                _authState.value = AuthState.Error("failed to send email verification")
+                                _authState.value = AuthState.Error("Failed to send email verification")
                             }
                         }
                 }else{
@@ -118,7 +118,7 @@ class authViewModel(application: Application): AndroidViewModel(application) {
 
     fun resetPassword(email: String){
         if(email.isEmpty()){
-            _authState.value = AuthState.Error("Please eneter your email")
+            _authState.value = AuthState.Error("Please enter your email")
             return
         }
         _authState.value = AuthState.Loading
