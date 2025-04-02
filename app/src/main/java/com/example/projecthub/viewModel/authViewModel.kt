@@ -115,6 +115,22 @@ class authViewModel(application: Application): AndroidViewModel(application) {
     private fun clearLoginSession() {
         sharedPreferences.edit().remove("RememberMe").apply()
     }
+
+    fun resetPassword(email: String){
+        if(email.isEmpty()){
+            _authState.value = AuthState.Error("Please eneter your email")
+            return
+        }
+        _authState.value = AuthState.Loading
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener{task->
+            if (task.isSuccessful){
+               _authState.value =  AuthState.Error("Reset password email has been sent!!")
+            }else{
+                _authState.value = AuthState.Error("Error sending reset email")
+            }
+        }
+    }
 }
 
 sealed class AuthState{

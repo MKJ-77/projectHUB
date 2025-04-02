@@ -222,6 +222,16 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                         onCheckedChange = { rememberMe = it }
                     )
                     Text(text = "Remember Me")
+
+                    TextButton(onClick = { authViewModel.resetPassword(email) }) {
+                        Text(text = "Forgot Password?")
+                    }
+
+                    authState.value?.let {
+                        if (it is AuthState.Error) {
+                            Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
 
