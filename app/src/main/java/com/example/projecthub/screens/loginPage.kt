@@ -39,17 +39,19 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var  rememberMe by remember { mutableStateOf(false) }
-
+    var rememberMe by remember { mutableStateOf(false) }
 
 
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
     LaunchedEffect(authState.value) {
-        when(authState.value){
+        when (authState.value) {
             is AuthState.Authenticated -> navController.navigate("home_page")
-            is AuthState.Error -> Toast.makeText(context, (authState.value as AuthState.Error).message,
-                Toast.LENGTH_SHORT).show()
+            is AuthState.Error -> Toast.makeText(
+                context, (authState.value as AuthState.Error).message,
+                Toast.LENGTH_SHORT
+            ).show()
+
             else -> Unit
         }
     }
@@ -73,7 +75,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                 .align(Alignment.TopEnd)
                 .offset(x = 50.dp, y = (-30).dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
         )
 
         Box(
@@ -82,7 +84,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                 .align(Alignment.BottomStart)
                 .offset(x = (-30).dp, y = 30.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
         )
 
         Box(
@@ -91,7 +93,15 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                 .align(Alignment.CenterStart)
                 .offset(x = (-70).dp, y = (-100).dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.03f))
+                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
+        )
+        Box(
+            modifier = Modifier
+                .size(130.dp)
+                .align(Alignment.CenterEnd)
+                .offset(x = (70).dp, y = (40).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.41f))
         )
 
         Card(
@@ -158,7 +168,8 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                         .padding(bottom = 16.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp
+                    tonalElevation = 1.dp,
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     OutlinedTextField(
                         value = email,
@@ -174,7 +185,9 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                 }
@@ -185,7 +198,8 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                         .padding(bottom = 8.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp
+                    tonalElevation = 1.dp,
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     OutlinedTextField(
                         value = password,
@@ -210,107 +224,121 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = rememberMe,
-                        onCheckedChange = { rememberMe = it }
-                    )
-                    Text(text = "Remember Me")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = rememberMe,
+                                onCheckedChange = { rememberMe = it }
+                            )
+                            Text(
+                                text = "Remember Me",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
 
-                    TextButton(onClick = { authViewModel.resetPassword(email) }) {
-                        Text(text = "Forgot Password?")
-                    }
-
-                    authState.value?.let {
-                        if (it is AuthState.Error) {
-                            Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                        TextButton(onClick = { authViewModel.resetPassword(email) }) {
+                            Text(
+                                text = "Forgot Password?",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                Button(
-                    onClick = { authViewModel.login(email, password) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .shadow(8.dp, RoundedCornerShape(12.dp)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
-                    ),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Box(
+                    Button(
+                        onClick = { authViewModel.login(email, password) },
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                brush = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary,
-                                        MaterialTheme.colorScheme.tertiary
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .shadow(8.dp, RoundedCornerShape(12.dp)),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        ),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(
-                            "Login",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.tertiary
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Login",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
-                }
 
-                when(authState.value){
-                    is AuthState.Error -> {
-                        val errorMessage = (authState.value as AuthState.Error).message
-                        Text(text = errorMessage, color = Color.Red)
-                        if (errorMessage.contains("verify your email", ignoreCase = true)) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(onClick = { authViewModel.resendVerificationEmail() }) {
-                                Text("Resend Verification Email")
+                    when (authState.value) {
+                        is AuthState.Error -> {
+                            val errorMessage = (authState.value as AuthState.Error).message
+                            Text(text = errorMessage, color = Color.Red)
+                            if (errorMessage.contains("verify your email", ignoreCase = true)) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(onClick = { authViewModel.resendVerificationEmail() }) {
+                                    Text("Resend Verification Email")
+                                }
                             }
                         }
-                    }
 
-                    is AuthState.Loading -> {
-                        CircularProgressIndicator()
-                    }
-
-                    is AuthState.Authenticated -> {
-                        LaunchedEffect(Unit) {
-                            navController.navigate("home_page")
+                        is AuthState.Loading -> {
+                            CircularProgressIndicator()
                         }
-                    }
-                    else -> Unit
-                }
 
-                Row(
-                    modifier = Modifier.padding(top = 24.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        "Don't have an account? ",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    TextButton(onClick = { navController.navigate("signup_page") }) {
+                        is AuthState.Authenticated -> {
+                            LaunchedEffect(Unit) {
+                                navController.navigate("home_page")
+                            }
+                        }
+
+                        else -> Unit
+                    }
+
+                    Row(
+                        modifier = Modifier.padding(top = 24.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Text(
-                            "Sign Up",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            "Don't have an account? ",
+                            style = MaterialTheme.typography.bodyMedium
                         )
+                        TextButton(onClick = { navController.navigate("signup_page") }) {
+                            Text(
+                                "Sign Up",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
         }
     }
-}

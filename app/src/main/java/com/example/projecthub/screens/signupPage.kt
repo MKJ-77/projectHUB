@@ -71,7 +71,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                 .align(Alignment.TopEnd)
                 .offset(x = 50.dp, y = (-30).dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
         )
 
         Box(
@@ -80,7 +80,32 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                 .align(Alignment.BottomStart)
                 .offset(x = (-30).dp, y = 30.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
+        )
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .align(Alignment.BottomEnd)
+                .offset(x = 30.dp, y = 30.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
+        )
+
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .align(Alignment.CenterStart)
+                .offset(x = (-70).dp, y = (-100).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
+        )
+        Box(
+            modifier = Modifier
+                .size(130.dp)
+                .align(Alignment.CenterEnd)
+                .offset(x = (70).dp, y = (40).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f))
         )
 
         Card(
@@ -147,7 +172,10 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         .padding(bottom = 16.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp
+                    tonalElevation = 1.dp,
+                    color = MaterialTheme.colorScheme.surface
+
+
                 ) {
                     OutlinedTextField(
                         value = email,
@@ -163,7 +191,9 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                 }
@@ -174,7 +204,9 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         .padding(bottom = 16.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp
+                    tonalElevation = 1.dp,
+                    color = MaterialTheme.colorScheme.surface
+
                 ) {
                     OutlinedTextField(
                         value = password,
@@ -199,7 +231,9 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                 }
@@ -210,7 +244,9 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         .padding(bottom = 16.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp
+                    tonalElevation = 1.dp,
+                    color = MaterialTheme.colorScheme.surface
+
                 ) {
                     OutlinedTextField(
                         value = confirmPassword,
@@ -235,7 +271,9 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                 }
