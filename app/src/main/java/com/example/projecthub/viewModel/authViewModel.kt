@@ -21,40 +21,57 @@ class authViewModel(application: Application): AndroidViewModel(application) {
         checkAuthStatus()
     }
 
-    fun checkAuthStatus(){
-        val user  = auth.currentUser
-
+    fun checkAuthStatus() {
+        val user = auth.currentUser
         val isRemembered = sharedPreferences.getBoolean("RememberMe", false)
 
-        if(user == null || !user.isEmailVerified){
+        if (user == null || !user.isEmailVerified) {
             _authState.value = AuthState.Unauthenticated
-        }else{
-            _authState.value = AuthState.Authenticated
+        } else {
+            val hasCompletedOnboarding = sharedPreferences.getBoolean(
+                "HasCompletedOnboarding_${user.uid}", false
+            )
+
+            if (hasCompletedOnboarding) {
+                _authState.value = AuthState.Authenticated
+            } else {
+                _authState.value = AuthState.FirstTimeUser
+            }
         }
     }
 
-    fun login(email : String , password : String){
-
-        if (email.isEmpty()||password.isEmpty()){
+    fun login(email: String, password: String, rememberMe: Boolean = false) {
+        if (email.isEmpty() || password.isEmpty()) {
             _authState.value = AuthState.Error("Email or Password missing")
             return
         }
 
-
         _authState.value = AuthState.Loading
-        auth.signInWithEmailAndPassword(email,password)
-            .addOnCompleteListener{task->
-                if (task.isSuccessful){
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null && user.isEmailVerified) {
-                        _authState.value = AuthState.Authenticated
-                    }else{
+                        // Check if user has completed onboarding
+                        val hasCompletedOnboarding = sharedPreferences.getBoolean(
+                            "HasCompletedOnboarding_${user.uid}", false
+                        )
+
+                        if (hasCompletedOnboarding) {
+                            _authState.value = AuthState.Authenticated
+                        } else {
+                            _authState.value = AuthState.FirstTimeUser
+                        }
+
+                        if (rememberMe) {
+                            saveLoginSession(rememberMe)
+                        }
+                    } else {
                         _authState.value = AuthState.Error("Please verify your email before login")
                         auth.signOut()
                     }
-                }else{
-                    _authState.value = AuthState.Error(task.exception?.message?:"Something went wrong")
-
+                } else {
+                    _authState.value = AuthState.Error(task.exception?.message ?: "Something went wrong")
                 }
             }
     }
@@ -131,10 +148,18 @@ class authViewModel(application: Application): AndroidViewModel(application) {
             }
         }
     }
+    fun completeOnboarding() {
+        val user = auth.currentUser
+        if (user != null) {
+            sharedPreferences.edit().putBoolean("HasCompletedOnboarding_${user.uid}", true).apply()
+            _authState.value = AuthState.Authenticated
+        }
+    }
 }
 
 sealed class AuthState{
     object Authenticated : AuthState()
+    object FirstTimeUser : AuthState()
     object Unauthenticated : AuthState()
     object Loading : AuthState()
     data class Error(val message :String) : AuthState()

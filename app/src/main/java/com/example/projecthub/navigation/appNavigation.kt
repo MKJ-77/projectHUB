@@ -29,7 +29,7 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel) {
             ProfileSetupScreen(navController)
         }
         composable("onBoarding_page") {
-            OnBoardingScreen(navController)
+            OnBoardingScreen(navController,authViewModel)
         }
     })
 }

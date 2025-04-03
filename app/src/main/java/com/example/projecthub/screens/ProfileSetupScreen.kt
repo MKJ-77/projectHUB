@@ -4,6 +4,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,7 +47,6 @@ fun ProfileSetupScreen(navController: NavHostController) {
     val maxBioWords = 50
     val maxSkills = 10
     val bioWordCount = bio.trim().split("\\s+".toRegex()).size
-    val bioExceedsLimit = bioWordCount > maxBioWords
 
     val context = LocalContext.current
 
@@ -114,32 +113,65 @@ fun ProfileSetupScreen(navController: NavHostController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
+                // Profile photo with border and edit icon
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(CircleShape)
-                        .background(SilverGray.copy(alpha = 0.5f))
-                        .clickable { }, //profilephoto
+                        .padding(4.dp),  // Add some padding for the border
                     contentAlignment = Alignment.Center
                 ) {
-                    if (profilePhoto != null) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Add profile photo",
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        //outline & add icon
-
+                    // Main profile photo
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                                shape = CircleShape
+                            )
+                            .background(SilverGray.copy(alpha = 0.5f))
+                            .clickable { }, // Profile photo click handler
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (profilePhoto != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Add profile photo",
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
 
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .align(Alignment.BottomEnd)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = CircleShape
+                            )
+                            .clickable { },           //edit profile photo
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit profile photo",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
 
                 }
                 Text(
@@ -184,18 +216,23 @@ fun ProfileSetupScreen(navController: NavHostController) {
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     Column {
+                        val wordCount = remember(bio) {
+                            if (bio.isBlank()) 0 else bio.trim().split("\\s+".toRegex()).size
+                        }
+                        val exceedsLimit = wordCount > maxBioWords
+
                         OutlinedTextField(
                             value = bio,
                             onValueChange = {
-                                val wordCount = it.trim().split("\\s+".toRegex()).size
-                                if (wordCount <= maxBioWords) bio = it
+                                val newWordCount = if (it.isBlank()) 0 else it.trim().split("\\s+".toRegex()).size
+                                if (newWordCount <= maxBioWords || it.length < bio.length) bio = it
                             },
                             label = { Row(){
                                 Text("Bio")
                                 Text(
-                                    text = "$bioWordCount/$maxBioWords words",
+                                    text = "$wordCount/$maxBioWords words",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = if (bioExceedsLimit) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = if (exceedsLimit) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.align(Alignment.CenterVertically).padding(start = 8.dp)
                                 )
                             } },
@@ -205,12 +242,13 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                 .height(120.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = if (bio.trim().split("\\s+".toRegex()).size > maxBioWords) Color.Red  //fix
+                                focusedBorderColor = if (exceedsLimit) Color.Red  //fix
                                 else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                unfocusedBorderColor = if (bio.trim().split("\\s+".toRegex()).size > maxBioWords) Color.Red //fix
+                                unfocusedBorderColor = if (exceedsLimit) Color.Red //fix
                                 else Color.Transparent,
                                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedContainerColor = MaterialTheme.colorScheme.surface
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                errorBorderColor = Color.Red
                             )
                         )
 
