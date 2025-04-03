@@ -52,6 +52,9 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
             is AuthState.FirstTimeUser -> navController.navigate("onBoarding_page") {
                 popUpTo("login_page") { inclusive = true }
             }
+            is AuthState.ProfileSetupRequired->navController.navigate("profile_setup_page"){
+                popUpTo("onBoarding_page"){inclusive = true}
+            }
             is AuthState.Error -> Toast.makeText(
                 context, (authState.value as AuthState.Error).message,
                 Toast.LENGTH_SHORT

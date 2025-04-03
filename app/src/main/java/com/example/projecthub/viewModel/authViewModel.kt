@@ -25,6 +25,8 @@ class authViewModel(application: Application): AndroidViewModel(application) {
         val user = auth.currentUser
         val isRemembered = sharedPreferences.getBoolean("RememberMe", false)
 
+
+
         if (user == null || !user.isEmailVerified) {
             _authState.value = AuthState.Unauthenticated
         } else {
@@ -32,10 +34,15 @@ class authViewModel(application: Application): AndroidViewModel(application) {
                 "HasCompletedOnboarding_${user.uid}", false
             )
 
-            if (hasCompletedOnboarding) {
-                _authState.value = AuthState.Authenticated
-            } else {
+            val hasCompletedProfileSetup= sharedPreferences.getBoolean(
+                "HasCompletedProfileSetup${user.uid}",false)
+
+            if (!hasCompletedOnboarding) {
                 _authState.value = AuthState.FirstTimeUser
+            } else if(!hasCompletedProfileSetup){
+                _authState.value = AuthState.ProfileSetupRequired
+            }else{
+                _authState.value = AuthState.Authenticated
             }
         }
     }
@@ -148,10 +155,22 @@ class authViewModel(application: Application): AndroidViewModel(application) {
             }
         }
     }
+
+
+
+
     fun completeOnboarding() {
         val user = auth.currentUser
         if (user != null) {
             sharedPreferences.edit().putBoolean("HasCompletedOnboarding_${user.uid}", true).apply()
+            _authState.value = AuthState.ProfileSetupRequired
+        }
+    }
+
+    fun completeProfileSetup(){
+        val user = auth.currentUser
+        if(user != null){
+            sharedPreferences.edit().putBoolean("HasCompletedProfileSetup_${user.uid}",true).apply()
             _authState.value = AuthState.Authenticated
         }
     }
@@ -160,6 +179,7 @@ class authViewModel(application: Application): AndroidViewModel(application) {
 sealed class AuthState{
     object Authenticated : AuthState()
     object FirstTimeUser : AuthState()
+    object ProfileSetupRequired : AuthState()
     object Unauthenticated : AuthState()
     object Loading : AuthState()
     data class Error(val message :String) : AuthState()
