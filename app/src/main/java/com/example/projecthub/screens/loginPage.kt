@@ -310,10 +310,12 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                         is AuthState.Loading -> {
                             CircularProgressIndicator()
                         }
-
+                        //Add condition for first time user
                         is AuthState.Authenticated -> {
                             LaunchedEffect(Unit) {
-                                navController.navigate("home_page")
+                                navController.navigate("onboarding_page") {
+                                    popUpTo("login_page") { inclusive = true }
+                                }
                             }
                         }
 

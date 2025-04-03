@@ -4,4 +4,6 @@ package com.example.projecthub.navigation
     object loginPage : routes("login_page")
     object signupPage : routes("signup_page")
     object homePage : routes("home_page")
+    object profileSetupPage : routes("profile_setup_page")
+    object onBoardingPage : routes("onBoarding_page")
 }
