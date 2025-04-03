@@ -46,7 +46,6 @@ fun ProfileSetupScreen(navController: NavHostController) {
 
     val maxBioWords = 50
     val maxSkills = 10
-    val bioWordCount = bio.trim().split("\\s+".toRegex()).size
 
     val context = LocalContext.current
 
@@ -216,16 +215,25 @@ fun ProfileSetupScreen(navController: NavHostController) {
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     Column {
-                        val wordCount = remember(bio) {
-                            if (bio.isBlank()) 0 else bio.trim().split("\\s+".toRegex()).size
-                        }
+//                        val wordCount by  remember { derivedStateOf {
+//                            if (bio.isBlank()) 0 else bio.trim().split("\\s+".toRegex()).size
+//                        }
+//
+//                        }
+//                        val exceedsLimit by remember { derivedStateOf { wordCount > maxBioWords }}
+
+                        val wordList = bio.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
+                        val wordCount = wordList.size
                         val exceedsLimit = wordCount > maxBioWords
+
 
                         OutlinedTextField(
                             value = bio,
-                            onValueChange = {
-                                val newWordCount = if (it.isBlank()) 0 else it.trim().split("\\s+".toRegex()).size
-                                if (newWordCount <= maxBioWords || it.length < bio.length) bio = it
+                            onValueChange = {newText->
+                                val newWordList = newText.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
+                                if (newWordList.size <= maxBioWords || newText.length < bio.length) {
+                                    bio = if(newWordList.size >= maxBioWords)newText.trimEnd()else newText
+                                }
                             },
                             label = { Row(){
                                 Text("Bio")
@@ -248,7 +256,6 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                 else Color.Transparent,
                                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                                 focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                errorBorderColor = Color.Red
                             )
                         )
 
