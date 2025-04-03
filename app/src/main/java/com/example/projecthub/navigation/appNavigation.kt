@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.projecthub.screens.OnBoardingScreen
+import com.example.projecthub.screens.ProfileSetupScreen
 import com.example.projecthub.screens.homePage
 import com.example.projecthub.screens.loginPage
 import com.example.projecthub.screens.signupPage
@@ -22,6 +24,12 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel) {
         }
         composable("home_page") {
             homePage(Modifier,navController,authViewModel)
+        }
+        composable("profile_setup_page") {
+            ProfileSetupScreen(navController)
+        }
+        composable("onBoarding_page") {
+            OnBoardingScreen(navController,authViewModel)
         }
     })
 }

@@ -46,12 +46,16 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
     val context = LocalContext.current
     LaunchedEffect(authState.value) {
         when (authState.value) {
-            is AuthState.Authenticated -> navController.navigate("home_page")
+            is AuthState.Authenticated -> navController.navigate("home_page") {
+                popUpTo("login_page") { inclusive = true }
+            }
+            is AuthState.FirstTimeUser -> navController.navigate("onBoarding_page") {
+                popUpTo("login_page") { inclusive = true }
+            }
             is AuthState.Error -> Toast.makeText(
                 context, (authState.value as AuthState.Error).message,
                 Toast.LENGTH_SHORT
             ).show()
-
             else -> Unit
         }
     }
@@ -310,12 +314,14 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                         is AuthState.Loading -> {
                             CircularProgressIndicator()
                         }
-
-                        is AuthState.Authenticated -> {
-                            LaunchedEffect(Unit) {
-                                navController.navigate("home_page")
-                            }
-                        }
+                        //Add condition for first time user
+//                        is AuthState.Authenticated -> {
+//                            LaunchedEffect(Unit) {
+//                                navController.navigate("onboarding_page") {
+//                                    popUpTo("login_page") { inclusive = true }
+//                                }
+//                            }
+//                        }
 
                         else -> Unit
                     }
