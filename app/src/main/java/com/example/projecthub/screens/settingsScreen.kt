@@ -72,7 +72,7 @@ fun settingsScreen(
                         SettingItem(
                             title = "Change Password",
                             icon = Icons.Default.Lock,
-                            onClick = { /* Navigate to change password */ }
+                            onClick = { navController.navigate("change_password_page") },
                         )
                     )
                 )

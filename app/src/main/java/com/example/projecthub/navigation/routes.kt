@@ -8,4 +8,5 @@ package com.example.projecthub.navigation
     object onBoardingPage : routes("onBoarding_page")
     object profilePage : routes("profile_page")
     object settingsScreen : routes("settings_page")
+    object changePasswordScreen : routes("change_password_page")
 }

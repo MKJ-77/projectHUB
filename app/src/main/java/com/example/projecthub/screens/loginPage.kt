@@ -44,6 +44,13 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
 
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        val savedEmail = authViewModel.getSavedEmail()
+        if (savedEmail.isNotEmpty()) {
+            email = savedEmail
+            rememberMe = true
+        }
+    }
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Authenticated -> navController.navigate("home_page") {
@@ -270,7 +277,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Button(
-                        onClick = { authViewModel.login(email, password) },
+                        onClick = { authViewModel.login(email, password,rememberMe) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
