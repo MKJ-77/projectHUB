@@ -3,6 +3,7 @@ package com.example.projecthub.screens
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,10 +26,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.projecthub.R
 import com.example.projecthub.ui.theme.SilverGray
 
 @Composable
@@ -44,13 +47,15 @@ fun ProfileSetupScreen(navController: NavHostController) {
     val skills = remember { mutableStateListOf<String>() }
     var profilePhoto by remember { mutableStateOf<Uri?>(null) }
 
+    var selectedPhotoId by remember { mutableStateOf(R.drawable.profilephoto1) }
+    var showPhotoDialog by remember { mutableStateOf(false) }
+
     val maxBioWords = 50
     val maxSkills = 10
 
     val context = LocalContext.current
 
-    val isValid =
-        name.isNotBlank() && collegeName.isNotBlank() && semester.isNotBlank() && college.isNotBlank() && skill.isNotBlank()
+    val isValid = name.isNotBlank() && collegeName.isNotBlank() && semester.isNotBlank() && collegeLocation.isNotBlank()
 
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
@@ -119,7 +124,6 @@ fun ProfileSetupScreen(navController: NavHostController) {
                         .padding(4.dp),  // Add some padding for the border
                     contentAlignment = Alignment.Center
                 ) {
-                    // Main profile photo
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -139,6 +143,13 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                     .fillMaxSize()
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primaryContainer)
+                            )
+                        }else if (selectedPhotoId != 0) {
+
+                            Image(
+                                painter = painterResource(id = selectedPhotoId),
+                                contentDescription = "Profile Photo",
+                                modifier = Modifier.fillMaxSize()
                             )
                         } else {
                             Icon(
@@ -161,7 +172,9 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                 color = MaterialTheme.colorScheme.surface,
                                 shape = CircleShape
                             )
-                            .clickable { },           //edit profile photo
+                            .clickable {
+                                showPhotoDialog = true
+                            },           //edit profile photo
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -173,6 +186,17 @@ fun ProfileSetupScreen(navController: NavHostController) {
                     }
 
                 }
+                if (showPhotoDialog) {
+                    ProfilePhotoSelection(
+                        showDialog = remember { mutableStateOf(showPhotoDialog) },
+                        selectedPhotoId = selectedPhotoId,
+                        onPhotoSelected = { photoId ->
+                            selectedPhotoId = photoId
+                            showPhotoDialog = false
+                        }
+                    )
+                }
+
                 Text(
                     text = "Add Photo",
                     style = MaterialTheme.typography.bodyMedium,
@@ -427,8 +451,10 @@ fun ProfileSetupScreen(navController: NavHostController) {
                         }
                     }
                 }
+
+                //Change it later
                 Button(
-                    onClick = { /* Save profile data */ },
+                    onClick = { navController.navigate("home_page") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
@@ -465,6 +491,8 @@ fun ProfileSetupScreen(navController: NavHostController) {
 
         }
     }
+
+
 
 }
 
