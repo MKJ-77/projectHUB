@@ -24,16 +24,21 @@ import androidx.navigation.NavHostController
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 
 @Composable
 fun settingsScreen(
     navController: NavHostController,
-    authViewModel: authViewModel = viewModel()
+    authViewModel: authViewModel = viewModel(),
+    themeViewModel: ThemeViewModel = viewModel()
 ){
     var showSignOutDialog by remember { mutableStateOf(false) }
-    var selectedTheme by remember { mutableStateOf("System Default") }
+    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
 
+    val selectedTheme by remember(isDarkMode) {
+        derivedStateOf { if (isDarkMode) "Dark" else "Light" }
+    }
     Scaffold(
         topBar = {
             MainAppBar(title = "Settings",navController = navController)
@@ -85,7 +90,12 @@ fun settingsScreen(
                             trailingContent = {
                                 ThemeSelector(
                                     selectedTheme = selectedTheme,
-                                    onThemeSelected = { theme -> selectedTheme = theme }
+                                    onThemeSelected = { theme ->
+                                        when (theme) {
+                                            "Light" -> themeViewModel.toggleTheme(false)
+                                            "Dark" -> themeViewModel.toggleTheme(true)
+                                        }
+                                    }
                                 )
                             }
                         )
@@ -299,19 +309,15 @@ fun SettingItemRow(item: SettingItem) {
     }
 }
 
-
 @Composable
 fun ThemeSelector(
     selectedTheme: String,
     onThemeSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val themes = listOf("Light", "Dark", "System Default")
+    val themes = listOf("Light", "Dark")
 
-    Box(
-        modifier = Modifier
-            .wrapContentSize(Alignment.TopEnd)
-    ) {
+    Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
         TextButton(
             onClick = { expanded = true },
             colors = ButtonDefaults.textButtonColors(

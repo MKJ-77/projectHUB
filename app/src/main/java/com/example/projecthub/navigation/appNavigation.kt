@@ -12,10 +12,13 @@ import com.example.projecthub.screens.loginPage
 import com.example.projecthub.screens.profileScreen
 import com.example.projecthub.screens.settingsScreen
 import com.example.projecthub.screens.signupPage
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 
 @Composable
-fun appNavigation(modifier: Modifier,authViewModel: authViewModel) {
+fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
+                  themeViewModel: ThemeViewModel
+) {
     val navController = rememberNavController()
     NavHost(navController = navController , startDestination = "login_page", builder = {
         composable("login_page") {
@@ -37,7 +40,7 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel) {
             profileScreen(navController)
         }
         composable(routes.settingsScreen.route) {
-            settingsScreen(navController)
+            settingsScreen(navController,authViewModel,themeViewModel)
         }
     })
 }

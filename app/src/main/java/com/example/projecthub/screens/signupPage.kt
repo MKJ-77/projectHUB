@@ -172,7 +172,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         .padding(bottom = 16.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp,
+//                    tonalElevation = 1.dp,
                     color = MaterialTheme.colorScheme.surface
 
 
@@ -204,7 +204,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         .padding(bottom = 16.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp,
+//                    tonalElevation = 1.dp,
                     color = MaterialTheme.colorScheme.surface
 
                 ) {
@@ -244,7 +244,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                         .padding(bottom = 16.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    tonalElevation = 1.dp,
+//                    tonalElevation = 1.dp,
                     color = MaterialTheme.colorScheme.surface
 
                 ) {
