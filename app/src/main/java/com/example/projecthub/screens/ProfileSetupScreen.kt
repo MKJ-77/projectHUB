@@ -55,8 +55,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
 
     val context = LocalContext.current
 
-    val isValid =
-        name.isNotBlank() && collegeName.isNotBlank() && semester.isNotBlank() && college.isNotBlank() && skill.isNotBlank()
+    val isValid = name.isNotBlank() && collegeName.isNotBlank() && semester.isNotBlank() && collegeLocation.isNotBlank()
 
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
@@ -125,7 +124,6 @@ fun ProfileSetupScreen(navController: NavHostController) {
                         .padding(4.dp),  // Add some padding for the border
                     contentAlignment = Alignment.Center
                 ) {
-                    // Main profile photo
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -453,8 +451,10 @@ fun ProfileSetupScreen(navController: NavHostController) {
                         }
                     }
                 }
+
+                //Change it later
                 Button(
-                    onClick = { /* Save profile data */ },
+                    onClick = { navController.navigate("home_page") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
@@ -491,14 +491,6 @@ fun ProfileSetupScreen(navController: NavHostController) {
 
         }
     }
-//    ProfilePhotoSelection(
-//        showDialog = remember { mutableStateOf(showPhotoDialog) },
-//        selectedPhotoId = selectedPhotoId,
-//        onPhotoSelected = { photoId ->
-//            selectedPhotoId = photoId
-//            showPhotoDialog = false
-//        }
-//    )
 
 
 

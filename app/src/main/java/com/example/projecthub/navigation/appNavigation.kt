@@ -9,6 +9,7 @@ import com.example.projecthub.screens.OnBoardingScreen
 import com.example.projecthub.screens.ProfileSetupScreen
 import com.example.projecthub.screens.homePage
 import com.example.projecthub.screens.loginPage
+import com.example.projecthub.screens.profileScreen
 import com.example.projecthub.screens.signupPage
 import com.example.projecthub.viewModel.authViewModel
 
@@ -22,14 +23,17 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel) {
         composable("signup_page") {
             signupPage(Modifier,navController,authViewModel)
         }
-        composable("home_page") {
-            homePage(Modifier,navController,authViewModel)
+        composable(routes.homePage.route) {
+            homePage(Modifier, navController, authViewModel)
         }
-        composable("profile_setup_page") {
+        composable(routes.profileSetupPage.route) {
             ProfileSetupScreen(navController)
         }
-        composable("onBoarding_page") {
-            OnBoardingScreen(navController,authViewModel)
+        composable(routes.onBoardingPage.route) {
+            OnBoardingScreen(navController, authViewModel)
+        }
+        composable(routes.profilePage.route) {
+            profileScreen(navController)
         }
     })
 }
