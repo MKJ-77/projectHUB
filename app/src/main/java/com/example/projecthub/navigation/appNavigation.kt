@@ -10,6 +10,7 @@ import com.example.projecthub.screens.ProfileSetupScreen
 import com.example.projecthub.screens.homePage
 import com.example.projecthub.screens.loginPage
 import com.example.projecthub.screens.profileScreen
+import com.example.projecthub.screens.settingsScreen
 import com.example.projecthub.screens.signupPage
 import com.example.projecthub.viewModel.authViewModel
 
@@ -34,6 +35,9 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel) {
         }
         composable(routes.profilePage.route) {
             profileScreen(navController)
+        }
+        composable(routes.settingsScreen.route) {
+            settingsScreen(navController)
         }
     })
 }

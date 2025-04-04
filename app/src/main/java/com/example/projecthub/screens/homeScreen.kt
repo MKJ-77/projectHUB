@@ -47,7 +47,7 @@ fun homePage(
 
     Scaffold(
         topBar = {
-            MainAppBar(title = "Home")
+            MainAppBar(title = "Home",navController = navController)
         },
         bottomBar = {
             bottomNavigationBar(navController = navController, currentRoute = "home_page")

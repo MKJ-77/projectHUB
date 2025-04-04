@@ -88,7 +88,7 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppBar(title: String) {
+fun MainAppBar(title: String, navController: NavHostController) {
     TopAppBar(
         title = {
             Text(
@@ -108,7 +108,7 @@ fun MainAppBar(title: String) {
                     contentDescription = "Notifications"
                 )
             }
-            IconButton(onClick = { /* Settings */ }) {
+            IconButton(onClick = { navController.navigate(routes.settingsScreen.route) }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Settings"
