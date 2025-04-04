@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.ui.theme.SilverGray
+import com.example.projecthub.usecases.bubbleBackground
 
 @Composable
 fun ProfileSetupScreen(navController: NavHostController) {
@@ -72,32 +73,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
             )
             .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .align(Alignment.TopEnd)
-                .offset(x = 50.dp, y = (-30).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .align(Alignment.CenterStart)
-                .offset(x = (-70).dp, y = (-100).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.BottomStart)
-                .offset(x = (-30).dp, y = 30.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
-        )
+        bubbleBackground()
 
         Card(
             modifier = Modifier
@@ -117,11 +93,10 @@ fun ProfileSetupScreen(navController: NavHostController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // Profile photo with border and edit icon
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .padding(4.dp),  // Add some padding for the border
+                        .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Box(
@@ -134,7 +109,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                 shape = CircleShape
                             )
                             .background(SilverGray.copy(alpha = 0.5f))
-                            .clickable { }, // Profile photo click handler
+                            .clickable { },
                         contentAlignment = Alignment.Center
                     ) {
                         if (profilePhoto != null) {
@@ -174,7 +149,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
                             )
                             .clickable {
                                 showPhotoDialog = true
-                            },           //edit profile photo
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -452,7 +427,6 @@ fun ProfileSetupScreen(navController: NavHostController) {
                     }
                 }
 
-                //Change it later
                 Button(
                     onClick = { navController.navigate("home_page") },
                     modifier = Modifier

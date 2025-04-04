@@ -1,6 +1,5 @@
 package com.example.projecthub.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -11,7 +10,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-
+import com.example.projecthub.viewModel.ThemeViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 //private val DarkColorScheme = darkColorScheme(
 //    primary = Purple80,
 //    secondary = PurpleGrey80,
@@ -64,7 +65,7 @@ private val LightColorScheme = lightColorScheme(
     onTertiaryContainer = CharcoalBlue,
     background = OffWhite,
     onBackground = CharcoalBlue,
-    surface = LightGray.copy(alpha = 0.5f),
+    surface = LightGray,
     onSurface = CharcoalBlue,
     surfaceVariant = LightGray,
     onSurfaceVariant = CharcoalBlue.copy(alpha = 0.7f),
@@ -86,21 +87,21 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 
-
 @Composable
 fun ProjectHUBTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeViewModel: ThemeViewModel,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val isDarkTheme by themeViewModel.isDarkMode.collectAsState()
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
-        darkTheme -> DarkColorScheme
+        isDarkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 

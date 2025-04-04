@@ -41,7 +41,7 @@ fun profileScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            MainAppBar(title = "Profile")
+            MainAppBar(title = "Profile",navController = navController)
         },
         bottomBar = {
             bottomNavigationBar(navController = navController, currentRoute = "profile")
