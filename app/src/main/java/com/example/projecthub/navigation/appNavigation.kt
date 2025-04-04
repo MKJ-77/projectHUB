@@ -31,7 +31,7 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
             homePage(Modifier, navController, authViewModel)
         }
         composable(routes.profileSetupPage.route) {
-            ProfileSetupScreen(navController)
+            ProfileSetupScreen(navController,authViewModel)
         }
         composable(routes.onBoardingPage.route) {
             OnBoardingScreen(navController, authViewModel)

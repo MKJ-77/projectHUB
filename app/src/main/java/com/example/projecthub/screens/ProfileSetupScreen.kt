@@ -33,10 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.ui.theme.SilverGray
+import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 @Composable
-fun ProfileSetupScreen(navController: NavHostController) {
+fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewModel) {
     var name by remember { mutableStateOf("") }
     var bio by remember { mutableStateOf("") }
     var collegeName by remember { mutableStateOf("") }
@@ -477,6 +478,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
                             db.collection("users").document(userId)
                                 .set(profile)
                                 .addOnSuccessListener {
+                                    authViewModel.completeProfileSetup()
                                     Toast.makeText(context, "Profile Saved Successfully!", Toast.LENGTH_SHORT).show()
                                     navController.navigate("home") // Navigate to home screen after saving
                                 }
@@ -484,7 +486,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                     Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
                         }
-                        navController.navigate("home_page")
+//                        navController.navigate("home_page")
                     },
                     modifier = Modifier
                         .fillMaxWidth()

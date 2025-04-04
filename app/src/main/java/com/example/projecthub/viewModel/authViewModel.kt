@@ -35,7 +35,7 @@ class authViewModel(application: Application): AndroidViewModel(application) {
             )
 
             val hasCompletedProfileSetup= sharedPreferences.getBoolean(
-                "HasCompletedProfileSetup${user.uid}",false)
+                "HasCompletedProfileSetup_${user.uid}",false)
 
             if (!hasCompletedOnboarding) {
                 _authState.value = AuthState.FirstTimeUser
