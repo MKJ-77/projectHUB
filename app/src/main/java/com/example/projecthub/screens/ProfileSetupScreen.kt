@@ -40,7 +40,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewModel = viewModel()) {
@@ -387,7 +386,6 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                         }
                     }
                 }
-
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -483,7 +481,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                     ) {
                         items(skills) { currentSkill ->
                             SuggestionChip(
-                                onClick = {skills.remove(currentSkill) }, //remove later
+                                onClick = { },
                                 label = { Text(currentSkill) },
                                 icon = {
 
@@ -503,15 +501,13 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                 Button(
                     onClick = {
                         val profile = hashMapOf(
-                            "profilePhotoId" to selectedPhotoId,
+                            "profilePhoto" to selectedPhotoId,
                             "name" to name,
                             "bio" to bio,
                             "collegeName" to collegeName,
                             "semester" to semester,
                             "collegeLocation" to collegeLocation,
-                            "skills" to skills,
-
-
+                            "skills" to skills
                         )
                         if (userId != null) {
                             db.collection("users").document(userId)
