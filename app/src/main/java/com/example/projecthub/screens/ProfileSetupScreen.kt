@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.ui.theme.SilverGray
@@ -37,7 +38,7 @@ import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 @Composable
-fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewModel) {
+fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewModel = viewModel()) {
     var name by remember { mutableStateOf("") }
     var bio by remember { mutableStateOf("") }
     var collegeName by remember { mutableStateOf("") }
@@ -480,13 +481,13 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                                 .addOnSuccessListener {
                                     authViewModel.completeProfileSetup()
                                     Toast.makeText(context, "Profile Saved Successfully!", Toast.LENGTH_SHORT).show()
-                                    navController.navigate("home") // Navigate to home screen after saving
+                                    navController.navigate("home_page")
                                 }
                                 .addOnFailureListener { e ->
                                     Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
                         }
-//                        navController.navigate("home_page")
+
                     },
                     modifier = Modifier
                         .fillMaxWidth()

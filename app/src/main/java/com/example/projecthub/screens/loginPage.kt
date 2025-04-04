@@ -47,7 +47,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Authenticated -> navController.navigate("home_page") {
-                popUpTo("login_page") { inclusive = true }
+                popUpTo("profile_setup_page") { inclusive = true }
             }
             is AuthState.FirstTimeUser -> navController.navigate("onBoarding_page") {
                 popUpTo("login_page") { inclusive = true }
