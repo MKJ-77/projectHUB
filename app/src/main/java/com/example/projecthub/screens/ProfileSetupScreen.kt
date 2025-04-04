@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.ui.theme.SilverGray
-import com.example.projecthub.usecases.bubbleBackground
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 @Composable
 fun ProfileSetupScreen(navController: NavHostController) {
     var name by remember { mutableStateOf("") }
@@ -56,7 +56,11 @@ fun ProfileSetupScreen(navController: NavHostController) {
 
     val context = LocalContext.current
 
-    val isValid = name.isNotBlank() && collegeName.isNotBlank() && semester.isNotBlank() && collegeLocation.isNotBlank()
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    val isValid =
+        name.isNotBlank() && collegeName.isNotBlank() && semester.isNotBlank() && collegeLocation.isNotBlank()
 
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
@@ -73,7 +77,32 @@ fun ProfileSetupScreen(navController: NavHostController) {
             )
             .padding(16.dp)
     ) {
-        bubbleBackground()
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 50.dp, y = (-30).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+        )
+
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .align(Alignment.CenterStart)
+                .offset(x = (-70).dp, y = (-100).dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
+        )
+
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .align(Alignment.BottomStart)
+                .offset(x = (-30).dp, y = 30.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
+        )
 
         Card(
             modifier = Modifier
@@ -93,10 +122,11 @@ fun ProfileSetupScreen(navController: NavHostController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
+                // Profile photo with border and edit icon
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .padding(4.dp),
+                        .padding(4.dp),  // Add some padding for the border
                     contentAlignment = Alignment.Center
                 ) {
                     Box(
@@ -109,7 +139,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                 shape = CircleShape
                             )
                             .background(SilverGray.copy(alpha = 0.5f))
-                            .clickable { },
+                            .clickable { }, // Profile photo click handler
                         contentAlignment = Alignment.Center
                     ) {
                         if (profilePhoto != null) {
@@ -119,7 +149,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primaryContainer)
                             )
-                        }else if (selectedPhotoId != 0) {
+                        } else if (selectedPhotoId != 0) {
 
                             Image(
                                 painter = painterResource(id = selectedPhotoId),
@@ -149,7 +179,7 @@ fun ProfileSetupScreen(navController: NavHostController) {
                             )
                             .clickable {
                                 showPhotoDialog = true
-                            },
+                            },           //edit profile photo
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -228,21 +258,26 @@ fun ProfileSetupScreen(navController: NavHostController) {
 
                         OutlinedTextField(
                             value = bio,
-                            onValueChange = {newText->
-                                val newWordList = newText.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
+                            onValueChange = { newText ->
+                                val newWordList = newText.trim().split("\\s+".toRegex())
+                                    .filter { it.isNotEmpty() }
                                 if (newWordList.size <= maxBioWords || newText.length < bio.length) {
-                                    bio = if(newWordList.size >= maxBioWords)newText.trimEnd()else newText
+                                    bio =
+                                        if (newWordList.size >= maxBioWords) newText.trimEnd() else newText
                                 }
                             },
-                            label = { Row(){
-                                Text("Bio")
-                                Text(
-                                    text = "$wordCount/$maxBioWords words",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (exceedsLimit) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.align(Alignment.CenterVertically).padding(start = 8.dp)
-                                )
-                            } },
+                            label = {
+                                Row() {
+                                    Text("Bio")
+                                    Text(
+                                        text = "$wordCount/$maxBioWords words",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (exceedsLimit) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.align(Alignment.CenterVertically)
+                                            .padding(start = 8.dp)
+                                    )
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .animateContentSize()
@@ -427,8 +462,30 @@ fun ProfileSetupScreen(navController: NavHostController) {
                     }
                 }
 
+                //Change it later
                 Button(
-                    onClick = { navController.navigate("home_page") },
+                    onClick = {
+                        val profile = hashMapOf(
+                            "name" to name,
+                            "bio" to bio,
+                            "collegeName" to collegeName,
+                            "semester" to semester,
+                            "collegeLocation" to collegeLocation,
+                            "skills" to skills
+                        )
+                        if (userId != null) {
+                            db.collection("users").document(userId)
+                                .set(profile)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Profile Saved Successfully!", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("home") // Navigate to home screen after saving
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                        navController.navigate("home_page")
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
@@ -464,11 +521,36 @@ fun ProfileSetupScreen(navController: NavHostController) {
 
 
         }
+
+
     }
 
-
-
 }
+
+//fun saveProfileToFireStore() {
+//    val userProfile = hashMapOf(
+//        "name" to name,
+//        "bio" to bio,
+//        "collegeName" to collegeName,
+//        "semester" to semester,
+//        "collegeLocation" to collegeLocation,
+//        "skills" to skills.toList()
+//    )
+//
+//    db.collection("users")
+//        .document(name)
+//        .set(userProfile)
+//        .addOnSuccessListener {
+//            Toast.makeText(context, "Profile saved successfully!", Toast.LENGTH_SHORT).show()
+//            navController.navigate("home_page")
+//        }
+//        .addOnFailureListener{
+//            Toast.makeText(context, "failed to save profile photo: ${it.message}!", Toast.LENGTH_SHORT).show()
+//        }
+//}
+//
+
+
 
 
 

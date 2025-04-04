@@ -2,7 +2,7 @@ package com.example.projecthub.models
 
 import com.example.projecthub.R
 
-data class userProfile(
+data class user(
     val userId: String = "",
     val name: String = "",
     val bio: String = "",

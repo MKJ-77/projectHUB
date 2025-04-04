@@ -1,9 +1,9 @@
 package com.example.projecthub
 
-import com.example.projecthub.models.userProfile
+import com.example.projecthub.models.user
 
 object dummyData {
-    val dummyUser = userProfile(
+    val dummyUser = user(
         userId = "12345",
         name = "John Doe",
         bio = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",

@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.webkit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -65,17 +66,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     implementation(libs.androidx.material.icons.extended)
+
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
 
-    // Add the dependency for the Realtime Database library
+    // Declare the dependency for the Cloud Firestore library
     // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation("com.google.firebase:firebase-database")
-    implementation ("androidx.compose.ui:ui:1.4.3")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation ("androidx.activity:activity-compose:1.7.0")
-    implementation ("com.google.firebase:firebase-database-ktx:20.2.2")
-    implementation ("com.google.firebase:firebase-auth-ktx:21.1.0")
-    implementation ("com.google.android.gms:play-services-auth:20.4.1")
-
+    implementation("com.google.firebase:firebase-firestore")
 }
