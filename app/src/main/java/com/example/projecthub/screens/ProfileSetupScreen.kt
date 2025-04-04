@@ -37,6 +37,11 @@ import com.example.projecthub.ui.theme.SilverGray
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewModel = viewModel()) {
     var name by remember { mutableStateOf("") }
@@ -334,23 +339,53 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                     tonalElevation = 1.dp,
                     color = MaterialTheme.colorScheme.surface
                 ) {
-                    OutlinedTextField(
-                        value = semester,
-                        onValueChange = { semester = it },
-                        label = { Text("Current Semester*") },
-                        leadingIcon = { Icon(Icons.Default.DateRange, "Semester") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateContentSize(),
-                        shape = RoundedCornerShape(12.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface
+                    var isExpanded by remember { mutableStateOf(false) }
+                    val semesterOptions = listOf("1", "2", "3", "4", "5", "6", "7", "8")
+
+                    ExposedDropdownMenuBox(
+                        expanded = isExpanded,
+                        onExpandedChange = { isExpanded = it },
+                    ) {
+                        OutlinedTextField(
+                            value = semester,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Current Semester*") },
+                            leadingIcon = { Icon(Icons.Default.DateRange, "Semester") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface
+                            )
                         )
-                    )
+
+                        ExposedDropdownMenu(
+                            expanded = isExpanded,
+                            onDismissRequest = { isExpanded = false },
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+                                .width(120.dp)
+                                .align(Alignment.End)
+// fix the alignment
+
+                        ) {
+                            semesterOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = {
+                                        semester = option
+                                        isExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Surface(
@@ -448,7 +483,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                     ) {
                         items(skills) { currentSkill ->
                             SuggestionChip(
-                                onClick = { },
+                                onClick = {skills.remove(currentSkill) }, //remove later
                                 label = { Text(currentSkill) },
                                 icon = {
 
@@ -468,12 +503,15 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                 Button(
                     onClick = {
                         val profile = hashMapOf(
+                            "profilePhotoId" to selectedPhotoId,
                             "name" to name,
                             "bio" to bio,
                             "collegeName" to collegeName,
                             "semester" to semester,
                             "collegeLocation" to collegeLocation,
-                            "skills" to skills
+                            "skills" to skills,
+
+
                         )
                         if (userId != null) {
                             db.collection("users").document(userId)

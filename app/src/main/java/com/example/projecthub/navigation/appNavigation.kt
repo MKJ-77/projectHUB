@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.projecthub.screens.ChangePasswordScreen
 import com.example.projecthub.screens.OnBoardingScreen
 import com.example.projecthub.screens.ProfileSetupScreen
 import com.example.projecthub.screens.homePage
@@ -41,6 +42,9 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
         }
         composable(routes.settingsScreen.route) {
             settingsScreen(navController,authViewModel,themeViewModel)
+        }
+        composable(routes.changePasswordScreen.route) {
+            ChangePasswordScreen(navController, authViewModel)
         }
     })
 }

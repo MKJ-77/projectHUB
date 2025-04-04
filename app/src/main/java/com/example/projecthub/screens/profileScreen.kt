@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,22 +19,72 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.projecthub.R
+import com.example.projecthub.data.UserProfile
 import com.example.projecthub.dummyData
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun profileScreen(navController: NavHostController) {
-    //Replace with actual user data from Firebase
-    val userProfile = dummyData.dummyUser
+    val db = FirebaseFirestore.getInstance()
+    val context = LocalContext.current
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
 
+    var userProfile by remember { mutableStateOf<UserProfile?>(null) }
+
+    LaunchedEffect(true) {
+        if (userId != null) {
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        val name = document.getString("name") ?: ""
+                        val bio = document.getString("bio") ?: ""
+                        val collegeName = document.getString("collegeName") ?: ""
+                        val semester = document.getString("semester") ?: ""
+                        val collegeLocation = document.getString("collegeLocation") ?: ""
+                        val skills = document.get("skills") as? List<String> ?: emptyList()
+                        val profilePhotoId = (document.getLong("profilePhotoId")
+                            ?: R.drawable.profilephoto1.toLong()).toInt()
+
+                        userProfile = UserProfile(
+                            name,
+                            bio,
+                            collegeName,
+                            semester,
+                            collegeLocation,
+                            skills,
+                            profilePhotoId
+                        )
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, "Error loading profile", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+    if (userProfile == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else {
+        ProfileScreenContent(navController = navController, userProfile = userProfile!!)
+    }
+}
+//Replace with actual user data from Firebase
+
+@Composable
+fun ProfileScreenContent(navController: NavHostController, userProfile: UserProfile) {
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
         MaterialTheme.colorScheme.background
