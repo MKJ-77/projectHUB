@@ -29,18 +29,22 @@ import com.example.projecthub.R
 import com.example.projecthub.data.UserProfile
 import com.example.projecthub.dummyData
 import com.example.projecthub.navigation.routes
+import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
+import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun profileScreen(navController: NavHostController) {
+fun profileScreen(navController: NavHostController,authViewModel: authViewModel) {
     val db = FirebaseFirestore.getInstance()
     val context = LocalContext.current
     val userId = FirebaseAuth.getInstance().currentUser?.uid
+    var showDialog by remember { mutableStateOf(false) }
+
 
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
 
@@ -79,17 +83,20 @@ fun profileScreen(navController: NavHostController) {
             CircularProgressIndicator()
         }
     } else {
-        ProfileScreenContent(navController = navController, userProfile = userProfile!!)
+        ProfileScreenContent(navController = navController, userProfile = userProfile!!,authViewModel = authViewModel)
     }
 }
-//Replace with actual user data from Firebase
 
 @Composable
-fun ProfileScreenContent(navController: NavHostController, userProfile: UserProfile) {
+fun ProfileScreenContent(navController: NavHostController, userProfile: UserProfile,authViewModel: authViewModel) {
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
         MaterialTheme.colorScheme.background
     )
+    var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+
 
     Scaffold(
         topBar = {
@@ -97,8 +104,30 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
         },
         bottomBar = {
             bottomNavigationBar(navController = navController, currentRoute = "profile")
-        }
+        },
+
+        floatingActionButton = {
+            CreateAssignmentFAB(onClick = { showDialog = true })
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+
+
     ) { paddingValues ->
+        if (showDialog) {
+            CreateAssignmentDialog(
+                showDialog = showDialog,
+                onDismiss = { showDialog = false },
+                authViewModel = authViewModel,
+                onAssignmentCreated = {
+                    showDialog = false
+                    Toast.makeText(
+                        context,
+                        "Assignment created successfully!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()

@@ -30,6 +30,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.projecthub.navigation.routes
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 @Composable
 fun bottomNavigationBar(navController: NavHostController, currentRoute: String) {
@@ -56,7 +65,13 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
             label = { Text("Assignments") },
             selected = currentRoute == "assignments",
             onClick = {
-                //Navigate to assignments screen
+                if (currentRoute != "assignments") {
+                    navController.navigate(routes.assignmentsScreen.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                }
+
             }
         )
 
@@ -156,5 +171,23 @@ fun bubbleBackground(modifier: Modifier = Modifier) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f))
         )
+    }
+}
+@Composable
+fun CreateAssignmentFAB(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier.offset(y = 35.dp)
+    ) {
+        FloatingActionButton(
+            onClick = onClick,
+            containerColor = MaterialTheme.colorScheme.primary,
+            shape = CircleShape
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = "Create Assignment",
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
