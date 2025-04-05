@@ -86,7 +86,6 @@ fun profileScreen(navController: NavHostController,authViewModel: authViewModel)
         ProfileScreenContent(navController = navController, userProfile = userProfile!!,authViewModel = authViewModel)
     }
 }
-//Replace with actual user data from Firebase
 
 @Composable
 fun ProfileScreenContent(navController: NavHostController, userProfile: UserProfile,authViewModel: authViewModel) {
@@ -112,7 +111,6 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
         },
         floatingActionButtonPosition = FabPosition.Center,
 
-// Add this to your content
 
     ) { paddingValues ->
         if (showDialog) {

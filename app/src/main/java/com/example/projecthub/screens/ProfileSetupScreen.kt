@@ -128,7 +128,6 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // Profile photo with border and edit icon
                 Box(
                     modifier = Modifier
                         .size(120.dp)
