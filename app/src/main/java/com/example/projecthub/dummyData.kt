@@ -21,7 +21,7 @@ object dummyData {
             description = "Create a simple Android app using Kotlin.",
             subject = "Computer Science",
             deadline = "2023-12-01",
-            budget = "$100",
+            budget = "300",
             postedBy = "John Doe",
             timestamp = System.currentTimeMillis()
         ),
@@ -30,7 +30,7 @@ object dummyData {
             description = "Build a responsive website using HTML, CSS, and JavaScript.",
             subject = "Web Development",
             deadline = "2023-11-15",
-            budget = "$150",
+            budget = "250",
             postedBy = "Jane Smith",
             timestamp = System.currentTimeMillis()
         ),
@@ -39,7 +39,7 @@ object dummyData {
             description = "Analyze a dataset and create visualizations using Python.",
             subject = "Data Science",
             deadline = "2023-11-30",
-            budget = "$200",
+            budget = "200",
             postedBy = "Alice Johnson",
             timestamp = System.currentTimeMillis()
         ),
@@ -48,7 +48,7 @@ object dummyData {
             description = "Implement a machine learning algorithm using Python.",
             subject = "Machine Learning",
             deadline = "2023-12-10",
-            budget = "$250",
+            budget = "250",
             postedBy = "Bob Brown",
             timestamp = System.currentTimeMillis()
         )

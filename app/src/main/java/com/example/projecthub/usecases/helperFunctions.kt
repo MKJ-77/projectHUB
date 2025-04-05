@@ -65,7 +65,13 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
             label = { Text("Assignments") },
             selected = currentRoute == "assignments",
             onClick = {
-                //Navigate to assignments screen
+                if (currentRoute != "assignments") {
+                    navController.navigate(routes.assignmentsScreen.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                }
+
             }
         )
 
