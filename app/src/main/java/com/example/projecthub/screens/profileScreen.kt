@@ -28,6 +28,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.projecthub.R
 import com.example.projecthub.data.UserProfile
 import com.example.projecthub.dummyData
+import com.example.projecthub.navigation.routes
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
@@ -182,8 +183,8 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
 
                         Button(
                             onClick = {
-                                //Navigate to edit profile screen
-                                // navController.navigate("edit_profile")
+                                navController.navigate(routes.editProfileScreen.route)
+
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -251,7 +252,6 @@ fun ProfileHeader(name: String, photoId: Int) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Name
         Text(
             text = name,
             style = MaterialTheme.typography.headlineMedium,

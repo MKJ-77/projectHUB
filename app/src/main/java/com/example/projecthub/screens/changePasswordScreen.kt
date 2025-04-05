@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,8 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -29,6 +32,7 @@ import androidx.navigation.NavHostController
 import com.example.projecthub.usecases.bubbleBackground
 import com.example.projecthub.viewModel.AuthState
 import com.example.projecthub.viewModel.authViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +46,8 @@ fun ChangePasswordScreen(
     var oldPasswordVisible by remember { mutableStateOf(false) }
     var newPasswordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    val currentUserEmail = remember { FirebaseAuth.getInstance().currentUser?.email ?: "" }
+
 
     val authState by authViewModel.authState.observeAsState()
 
@@ -56,6 +62,8 @@ fun ChangePasswordScreen(
             oldPassword = ""
             newPassword = ""
             confirmPassword = ""
+            navController.navigateUp()
+
         }
     }
 
@@ -280,6 +288,7 @@ fun ChangePasswordScreen(
                     Button(
                         onClick = {
                             authViewModel.changePassword(oldPassword, newPassword)
+
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -311,6 +320,16 @@ fun ChangePasswordScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    TextButton(onClick = { authViewModel.resetPassword(currentUserEmail) }) {
+                        Text(
+                            text = "Forgot Password?",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
 
                     if (authState is AuthState.Error) {

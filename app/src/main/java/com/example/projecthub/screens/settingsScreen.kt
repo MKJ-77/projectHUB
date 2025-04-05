@@ -35,10 +35,11 @@ fun settingsScreen(
 ){
     var showSignOutDialog by remember { mutableStateOf(false) }
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+    val themeMode by themeViewModel.themeMode.collectAsState()
 
-    val selectedTheme by remember(isDarkMode) {
-        derivedStateOf { if (isDarkMode) "Dark" else "Light" }
-    }
+
+    val selectedTheme = themeMode
+
     Scaffold(
         topBar = {
             MainAppBar(title = "Settings",navController = navController)
@@ -91,14 +92,13 @@ fun settingsScreen(
                                 ThemeSelector(
                                     selectedTheme = selectedTheme,
                                     onThemeSelected = { theme ->
-                                        when (theme) {
-                                            "Light" -> themeViewModel.toggleTheme(false)
-                                            "Dark" -> themeViewModel.toggleTheme(true)
-                                        }
+                                        themeViewModel.setThemeMode(theme)
+
                                     }
                                 )
                             }
                         )
+
                     )
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -167,6 +167,7 @@ fun settingsScreen(
         if (showSignOutDialog) {
             AlertDialog(
                 onDismissRequest = { showSignOutDialog = false },
+                containerColor = MaterialTheme.colorScheme.surface.copy(0.95f),
                 title = { Text("Sign Out") },
                 text = { Text("Are you sure you want to sign out?") },
                 confirmButton = {
@@ -308,14 +309,14 @@ fun SettingItemRow(item: SettingItem) {
         )
     }
 }
-
 @Composable
 fun ThemeSelector(
     selectedTheme: String,
     onThemeSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val themes = listOf("Light", "Dark")
+    // Add "Default" to the themes list
+    val themes = listOf("Light", "Dark", "Default")
 
     Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
         TextButton(

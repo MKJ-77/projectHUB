@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
+import com.example.projecthub.navigation.routes
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 
@@ -213,7 +215,8 @@ class authViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    fun changePassword(oldPassword: String, newPassword: String) {
+    fun changePassword(oldPassword: String, newPassword: String,
+    ) {
         val user = auth.currentUser
 
         if (user == null) {
