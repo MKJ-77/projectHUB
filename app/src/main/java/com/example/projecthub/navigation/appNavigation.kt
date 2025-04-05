@@ -95,6 +95,9 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
         composable(routes.createAssignmentScreen.route) {
             createAssignmentScreen(navController,authViewModel)
         }
+        composable(routes.assignmentsScreen.route) {
+            // Assignments screen implementation
+        }
 
     })
 }
