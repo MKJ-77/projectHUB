@@ -210,12 +210,13 @@ fun  AssignmentCard(assignment: Assignment) {
         modifier = Modifier.fillMaxWidth(),
         onClick = { /* Navigate to assignment details */ },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
         ),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
+            defaultElevation = 8.dp
         ),
+
 
         ) {
         Column(

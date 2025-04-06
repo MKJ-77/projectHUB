@@ -40,6 +40,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun bottomNavigationBar(navController: NavHostController, currentRoute: String) {
@@ -196,4 +200,18 @@ fun CreateAssignmentFAB(onClick: () -> Unit) {
 fun formatTimestamp(timestamp: Timestamp): String {
     val sdf = java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a", java.util.Locale.getDefault())
     return sdf.format(timestamp.toDate())
+}
+
+fun getCurrentDate(): String {
+    val dateFormat = SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault())
+    return dateFormat.format(Date())
+}
+
+fun getGreeting(): String {
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    return when {
+        hour < 12 -> "Good Morning"
+        hour < 17 -> "Good Afternoon"
+        else -> "Good Evening"
+    }
 }
