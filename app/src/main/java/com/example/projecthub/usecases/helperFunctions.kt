@@ -39,6 +39,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.Timestamp
 
 @Composable
 fun bottomNavigationBar(navController: NavHostController, currentRoute: String) {
@@ -192,7 +193,7 @@ fun CreateAssignmentFAB(onClick: () -> Unit) {
     }
 }
 
-fun formatTimestamp(timestamp: Long): String {
+fun formatTimestamp(timestamp: Timestamp): String {
     val sdf = java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a", java.util.Locale.getDefault())
-    return sdf.format(java.util.Date(timestamp))
+    return sdf.format(timestamp.toDate())
 }

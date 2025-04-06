@@ -37,7 +37,9 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,25 +48,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.data.Assignment
-import com.example.projecthub.dummyData.dummyAssignments
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.formatTimestamp
 import com.example.projecthub.viewModel.authViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun assignmentsScreen(navController: NavHostController,
-                      authViewModel: authViewModel
+                      authViewModel: authViewModel = viewModel()
 ) {
 
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("My Assignments", "All Assignments")
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    val assignmentsState = remember { mutableStateListOf<Assignment>() }
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+    LaunchedEffect(Unit) {
+        Firebase.firestore.collection("assignments")
+            .get()
+            .addOnSuccessListener { result ->
+                assignmentsState.clear()
+                val assignments = result.documents.mapNotNull { doc ->
+                    doc.toObject(Assignment::class.java)
+                }
+                assignmentsState.addAll(assignments)
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Failed to fetch assignments", Toast.LENGTH_SHORT).show()
+            }
+    }
 
     Scaffold(
         topBar = {
@@ -98,8 +121,15 @@ fun assignmentsScreen(navController: NavHostController,
 
             }
             when (selectedTab) {
-                0 -> PostedAssignmentsList(dummyAssignments)
-                1 -> AvailableAssignmentsList()
+                0 -> {
+                    val postByMe = if (currentUserId != null) {
+                        assignmentsState.filter {
+                            it.postedBy == currentUserId
+                        }
+                    }else emptyList()
+                    AvailableAssignmentsList(postByMe)
+                }
+                1 -> AvailableAssignmentsList(assignments = assignmentsState)
             }
 
         }
@@ -123,36 +153,50 @@ fun assignmentsScreen(navController: NavHostController,
 }
 
 @Composable
-fun AvailableAssignmentsList() {
-    TODO("Not yet implemented")
-}
-
-@Composable
-fun PostedAssignmentsList(assignments: List<Assignment>){
-    if(assignments.isEmpty()){
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("You haven't posted any assignments yet")
+fun AvailableAssignmentsList(assignments: List<Assignment>) {
+    if (assignments.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No assignments available")
         }
-    }else{
-        LazyColumn (
+    } else {
+        LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
-
-        ){
-            items(assignments){ assignment ->
+        ) {
+            items(assignments) { assignment ->
                 AssignmentCard(assignment)
             }
         }
     }
 }
 
+//@Composable
+//fun PostedAssignmentsList(assignments: List<Assignment>){
+//    if(assignments.isEmpty()){
+//        Box(
+//            modifier = Modifier.fillMaxSize(),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Text("You haven't posted any assignments yet")
+//        }
+//    }else{
+//        LazyColumn (
+//            modifier = Modifier.fillMaxSize(),
+//            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+//            verticalArrangement = Arrangement.spacedBy(8.dp)
+//
+//        ){
+//            items(assignments){ assignment ->
+//                AssignmentCard(assignment)
+//            }
+//        }
+//    }
+//}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssignmentCard(assignment: Assignment) {
+fun     AssignmentCard(assignment: Assignment) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = { /* Navigate to assignment details */ },

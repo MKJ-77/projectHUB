@@ -1,5 +1,7 @@
 package com.example.projecthub.data
 
+import com.google.firebase.Timestamp
+
 data class Assignment(
     val title : String = "",
     val description : String = "",
@@ -7,5 +9,5 @@ data class Assignment(
     val deadline : String = "",
     val budget : String = "",
     val postedBy : String = "",
-    val timestamp : Long = System.currentTimeMillis()
+    val timestamp : Timestamp = Timestamp.now(),
 )
