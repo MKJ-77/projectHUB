@@ -7,7 +7,7 @@ data class Assignment(
     val description : String = "",
     val subject : String = "",
     val deadline : String = "",
-    val budget : String = "",
-    val postedBy : String = "",
+    val budget : Int = 0,
+    val createdBy : String = "",
     val timestamp : Timestamp = Timestamp.now(),
 )

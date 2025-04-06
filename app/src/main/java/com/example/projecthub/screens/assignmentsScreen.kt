@@ -75,7 +75,7 @@ fun assignmentsScreen(navController: NavHostController,
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     LaunchedEffect(Unit) {
-        Firebase.firestore.collection("assignments")
+        Firebase.firestore.collection("assignments_page")
             .get()
             .addOnSuccessListener { result ->
                 assignmentsState.clear()
@@ -94,7 +94,7 @@ fun assignmentsScreen(navController: NavHostController,
             MainAppBar(title = "Assignments", navController = navController)
         },
         bottomBar = {
-            bottomNavigationBar(navController = navController, currentRoute = "profile")
+            bottomNavigationBar(navController = navController, currentRoute = "assignments")
         },
 
         floatingActionButton = {
@@ -122,12 +122,12 @@ fun assignmentsScreen(navController: NavHostController,
             }
             when (selectedTab) {
                 0 -> {
-                    val postByMe = if (currentUserId != null) {
+                    val myAssignments = if (currentUserId != null) {
                         assignmentsState.filter {
-                            it.postedBy == currentUserId
+                            it.createdBy == currentUserId
                         }
                     }else emptyList()
-                    AvailableAssignmentsList(postByMe)
+                    AvailableAssignmentsList(myAssignments)
                 }
                 1 -> AvailableAssignmentsList(assignments = assignmentsState)
             }
@@ -196,7 +196,7 @@ fun AvailableAssignmentsList(assignments: List<Assignment>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun     AssignmentCard(assignment: Assignment) {
+fun  AssignmentCard(assignment: Assignment) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = { /* Navigate to assignment details */ },
@@ -265,7 +265,7 @@ fun     AssignmentCard(assignment: Assignment) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 InfoChip(Icons.Default.Timer, "Deadline: ${assignment.deadline}")
-                InfoChip(Icons.Default.CurrencyRupee, assignment.budget)
+                InfoChip(Icons.Default.CurrencyRupee, assignment.budget.toString())
             }
 
             Spacer(modifier = Modifier.height(12.dp))
