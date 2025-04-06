@@ -1,4 +1,4 @@
-package com.example.projecthub.screens
+    package com.example.projecthub.screens
 
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
@@ -28,6 +28,10 @@ import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
 import com.example.projecthub.viewModel.authViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -95,6 +99,8 @@ fun CreateAssignmentDialog(
     val showDatePicker = remember { mutableStateOf(false) }
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val context = LocalContext.current
+
+    val db = FirebaseFirestore.getInstance()
 
     val isFormValid = title.isNotBlank() && description.isNotBlank() &&
             subject.isNotBlank() && deadline.isNotBlank() && budget.isNotBlank()
@@ -280,6 +286,7 @@ fun CreateAssignmentDialog(
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     OutlinedTextField(
+                        singleLine = true,
                         value = budget,
                         onValueChange = {
                             if (it.isEmpty() || it.all { char -> char.isDigit() }) {
@@ -328,12 +335,35 @@ fun CreateAssignmentDialog(
                     Button(
                         onClick = {
                             if (isFormValid) {
-                                onAssignmentCreated()
+                                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+                                val assignment = hashMapOf(
+                                    "title" to title,
+                                    "description" to description,
+                                    "subject" to subject,
+                                    "deadline" to deadline,
+                                    "budget" to (budget.toIntOrNull() ?: 0),
+                                    "createdBy" to userId,
+                                    "timestamp" to FieldValue.serverTimestamp()
+                                )
+
+                                db.collection("assignments")
+                                    .add(assignment)
+                                    .addOnSuccessListener {
+                                        onAssignmentCreated()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(
+                                            context,
+                                            "Failed: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
                             } else {
                                 Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()
                             }
                         },
-                        colors = ButtonDefaults.textButtonColors(
+                                colors = ButtonDefaults.textButtonColors(
                             contentColor = MaterialTheme.colorScheme.primary,
                             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                         )

@@ -191,3 +191,8 @@ fun CreateAssignmentFAB(onClick: () -> Unit) {
         }
     }
 }
+
+fun formatTimestamp(timestamp: Long): String {
+    val sdf = java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a", java.util.Locale.getDefault())
+    return sdf.format(java.util.Date(timestamp))
+}

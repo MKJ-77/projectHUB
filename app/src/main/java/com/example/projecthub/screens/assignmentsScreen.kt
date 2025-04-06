@@ -52,6 +52,7 @@ import com.example.projecthub.dummyData.dummyAssignments
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
+import com.example.projecthub.usecases.formatTimestamp
 import com.example.projecthub.viewModel.authViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -163,7 +164,7 @@ fun AssignmentCard(assignment: Assignment) {
             defaultElevation = 4.dp
         ),
 
-    ) {
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -192,6 +193,11 @@ fun AssignmentCard(assignment: Assignment) {
                     )
                 }
             }
+            Text(
+                text = "Posted: ${formatTimestamp(assignment.timestamp)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
