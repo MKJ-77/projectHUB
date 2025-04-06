@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
@@ -65,6 +66,7 @@ import com.google.firebase.firestore.firestore
 fun assignmentsScreen(navController: NavHostController,
                       authViewModel: authViewModel = viewModel()
 ) {
+    var isLoading by remember { mutableStateOf(true) }
 
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("My Assignments", "All Assignments")
@@ -75,7 +77,8 @@ fun assignmentsScreen(navController: NavHostController,
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     LaunchedEffect(Unit) {
-        Firebase.firestore.collection("assignments_page")
+        isLoading = true
+        Firebase.firestore.collection("assignments")
             .get()
             .addOnSuccessListener { result ->
                 assignmentsState.clear()
@@ -83,9 +86,11 @@ fun assignmentsScreen(navController: NavHostController,
                     doc.toObject(Assignment::class.java)
                 }
                 assignmentsState.addAll(assignments)
+                isLoading = false
             }
             .addOnFailureListener {
                 Toast.makeText(context, "Failed to fetch assignments", Toast.LENGTH_SHORT).show()
+                isLoading = false
             }
     }
 
@@ -94,7 +99,7 @@ fun assignmentsScreen(navController: NavHostController,
             MainAppBar(title = "Assignments", navController = navController)
         },
         bottomBar = {
-            bottomNavigationBar(navController = navController, currentRoute = "assignments")
+            bottomNavigationBar(navController = navController, currentRoute = "assignments_page")
         },
 
         floatingActionButton = {
@@ -127,7 +132,7 @@ fun assignmentsScreen(navController: NavHostController,
                             it.createdBy == currentUserId
                         }
                     }else emptyList()
-                    AvailableAssignmentsList(myAssignments)
+                    AvailableAssignmentsList(myAssignments,isLoading)
                 }
                 1 -> AvailableAssignmentsList(assignments = assignmentsState)
             }
@@ -153,8 +158,12 @@ fun assignmentsScreen(navController: NavHostController,
 }
 
 @Composable
-fun AvailableAssignmentsList(assignments: List<Assignment>) {
-    if (assignments.isEmpty()) {
+fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = false) {
+    if(isLoading){
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    }else if (assignments.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No assignments available")
         }
