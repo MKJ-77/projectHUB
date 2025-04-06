@@ -17,6 +17,7 @@ import com.example.projecthub.screens.ChangePasswordScreen
 import com.example.projecthub.screens.EditProfileScreen
 import com.example.projecthub.screens.OnBoardingScreen
 import com.example.projecthub.screens.ProfileSetupScreen
+import com.example.projecthub.screens.assignmentDetailScreen
 import com.example.projecthub.screens.assignmentsScreen
 import com.example.projecthub.screens.createAssignmentScreen
 import com.example.projecthub.screens.homePage
@@ -98,6 +99,9 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
         }
         composable(routes.assignmentsScreen.route) {
             assignmentsScreen(navController,authViewModel)
+        }
+        composable (routes.assignmentDetailScreen.route){
+            assignmentDetailScreen()
         }
 
     })

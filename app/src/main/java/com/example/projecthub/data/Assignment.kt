@@ -3,6 +3,7 @@ package com.example.projecthub.data
 import com.google.firebase.Timestamp
 
 data class Assignment(
+    val id : String =" ",
     val title : String = "",
     val description : String = "",
     val subject : String = "",

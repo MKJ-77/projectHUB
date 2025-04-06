@@ -132,9 +132,9 @@ fun assignmentsScreen(navController: NavHostController,
                             it.createdBy == currentUserId
                         }
                     }else emptyList()
-                    AvailableAssignmentsList(myAssignments,isLoading)
+                    AvailableAssignmentsList(myAssignments, isLoading,navController)
                 }
-                1 -> AvailableAssignmentsList(assignments = assignmentsState)
+                1 -> AvailableAssignmentsList(assignments = assignmentsState,navController = navController)
             }
 
         }
@@ -158,7 +158,7 @@ fun assignmentsScreen(navController: NavHostController,
 }
 
 @Composable
-fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = false) {
+fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = false,navController: NavHostController) {
     if(isLoading){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -174,7 +174,7 @@ fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = 
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(assignments) { assignment ->
-                AssignmentCard(assignment)
+                AssignmentCard(assignment, navController)
             }
         }
     }
@@ -205,7 +205,7 @@ fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun  AssignmentCard(assignment: Assignment) {
+fun  AssignmentCard(assignment: Assignment,navController: NavHostController) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = { /* Navigate to assignment details */ },
@@ -285,7 +285,7 @@ fun  AssignmentCard(assignment: Assignment) {
                 horizontalArrangement = Arrangement.End
             ) {
                 OutlinedButton(
-                    onClick = { /* View bids */ },
+                    onClick = { navController.navigate("assignment_details_page/${assignment.id}") },
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
                     Text("View Bids")

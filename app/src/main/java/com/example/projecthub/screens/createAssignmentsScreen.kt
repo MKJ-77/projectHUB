@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.projecthub.data.Assignment
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
@@ -336,7 +337,9 @@ fun CreateAssignmentDialog(
                         onClick = {
                             if (isFormValid) {
                                 val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+                                val assignmentRef = db.collection("assignments").document()
                                 val assignment = hashMapOf(
+                                    "id" to assignmentRef.id,
                                     "title" to title,
                                     "description" to description,
                                     "subject" to subject,
@@ -346,8 +349,7 @@ fun CreateAssignmentDialog(
                                     "timestamp" to FieldValue.serverTimestamp()
                                 )
 
-                                db.collection("assignments")
-                                    .add(assignment)
+                                assignmentRef.set(assignment)
                                     .addOnSuccessListener {
                                         onAssignmentCreated()
                                     }
