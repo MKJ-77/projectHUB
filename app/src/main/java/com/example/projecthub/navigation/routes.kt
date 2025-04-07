@@ -12,6 +12,5 @@ package com.example.projecthub.navigation
     object editProfileScreen : routes("edit_profile_page")
     object createAssignmentScreen : routes("create_assignment_page")
     object assignmentsScreen : routes("assignments_page")
-    object assignmentDetailScreen : routes("assignment_detail_page")
-
+    object assignmentDetailScreen : routes("assignment_details/{assignmentId}")
 }

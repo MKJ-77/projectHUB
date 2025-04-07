@@ -464,7 +464,7 @@ private fun Assignment_Card(assignment: Assignment) {
         ),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        onClick = { /* Navigate to assignment details */ }
+        onClick = {  }
     ) {
         Column(
             modifier = Modifier
