@@ -136,7 +136,7 @@ fun CreateAssignmentDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier
-            .fillMaxWidth(0.95f)
+            .width(360.dp)
             .wrapContentHeight()
             .padding(vertical = 8.dp),
         shape = RoundedCornerShape(24.dp),
@@ -178,7 +178,7 @@ fun CreateAssignmentDialog(
                         leadingIcon = { Icon(Icons.Default.Title, "Title") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateContentSize(),
+                            ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
@@ -205,7 +205,7 @@ fun CreateAssignmentDialog(
                         leadingIcon = { Icon(Icons.Default.Book, "Subject") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateContentSize(),
+                            ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
@@ -232,7 +232,7 @@ fun CreateAssignmentDialog(
                         leadingIcon = { Icon(Icons.Default.Description, "Description") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateContentSize()
+
                             .height(100.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -266,7 +266,7 @@ fun CreateAssignmentDialog(
                         readOnly = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateContentSize(),
+                            ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,
@@ -299,7 +299,7 @@ fun CreateAssignmentDialog(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateContentSize(),
+                            ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.Transparent,

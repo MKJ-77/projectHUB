@@ -76,8 +76,8 @@ fun EditProfileScreen(
                         val fetchedSemester = document.getString("semester") ?: ""
                         val fetchedCollegeLocation = document.getString("collegeLocation") ?: ""
                         val fetchedSkills = document.get("skills") as? List<String> ?: emptyList()
-                        val fetchedPhotoId = (document.getLong("profilePhoto")
-                            ?: R.drawable.profilephoto1.toLong()).toInt()
+                        val fetchedPhotoId = document.getLong("profilePhotoId")?.toInt()
+                            ?: R.drawable.profilephoto1
 
                         name = fetchedName
                         bio = fetchedBio
@@ -505,7 +505,7 @@ fun EditProfileScreen(
                             Button(
                                 onClick = {
                                     val updatedProfile = hashMapOf(
-                                        "profilePhoto" to selectedPhotoId,
+                                        "profilePhotoId" to selectedPhotoId,
                                         "name" to name,
                                         "bio" to bio,
                                         "collegeName" to collegeName,

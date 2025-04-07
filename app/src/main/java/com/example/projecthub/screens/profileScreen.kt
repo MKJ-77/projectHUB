@@ -59,8 +59,8 @@ fun profileScreen(navController: NavHostController,authViewModel: authViewModel)
                         val semester = document.getString("semester") ?: ""
                         val collegeLocation = document.getString("collegeLocation") ?: ""
                         val skills = document.get("skills") as? List<String> ?: emptyList()
-                        val profilePhotoId = (document.getLong("profilePhotoId")
-                            ?: R.drawable.profilephoto1.toLong()).toInt()
+                        val profilePhotoId = document.getLong("profilePhotoId")?.toInt()
+                            ?: R.drawable.profilephoto1
 
                         userProfile = UserProfile(
                             name,

@@ -160,7 +160,7 @@ fun homePage(
                     IconButton(onClick = { /*Notifications  */ }) {
                         Icon(Icons.Default.Notifications, contentDescription = "Notifications")
                     }
-                    IconButton(onClick = { /* Settings */ }) {
+                    IconButton(onClick = {navController.navigate(routes.settingsScreen.route)}) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
                 },
