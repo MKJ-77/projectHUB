@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,13 +53,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.data.Assignment
+import com.example.projecthub.data.Bid
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.formatTimestamp
+import com.example.projecthub.usecases.updateBidStatus
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +87,8 @@ fun assignmentsScreen(navController: NavHostController,
             .addOnSuccessListener { result ->
                 assignmentsState.clear()
                 val assignments = result.documents.mapNotNull { doc ->
-                    doc.toObject(Assignment::class.java)
+                    val assignment = doc.toObject(Assignment::class.java)
+                    assignment?.copy(id = doc.id)
                 }
                 assignmentsState.addAll(assignments)
                 isLoading = false
@@ -205,10 +210,16 @@ fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun  AssignmentCard(assignment: Assignment,navController: NavHostController) {
+fun AssignmentCard(assignment: Assignment, navController: NavHostController) {
+    val context = LocalContext.current
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    val isCreatedByCurrentUser = assignment.createdBy == currentUserId
+    var showBidDialog by remember { mutableStateOf(false) }
+    var showBidsListDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = { /* Navigate to assignment details */ },
+
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
         ),
@@ -216,14 +227,11 @@ fun  AssignmentCard(assignment: Assignment,navController: NavHostController) {
         elevation = CardDefaults.cardElevation(
             defaultElevation = 8.dp
         ),
-
-
-        ) {
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -247,6 +255,7 @@ fun  AssignmentCard(assignment: Assignment,navController: NavHostController) {
                     )
                 }
             }
+
             Text(
                 text = "Posted: ${formatTimestamp(assignment.timestamp)}",
                 style = MaterialTheme.typography.bodySmall,
@@ -275,7 +284,7 @@ fun  AssignmentCard(assignment: Assignment,navController: NavHostController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 InfoChip(Icons.Default.Timer, "Deadline: ${assignment.deadline}")
-                InfoChip(Icons.Default.CurrencyRupee, assignment.budget.toString())
+                InfoChip(Icons.Default.CurrencyRupee, "₹${assignment.budget}")
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -284,14 +293,200 @@ fun  AssignmentCard(assignment: Assignment,navController: NavHostController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                OutlinedButton(
-                    onClick = { navController.navigate("assignment_details_page/${assignment.id}") },
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Text("View Bids")
+                if (isCreatedByCurrentUser) {
+                    // Show management options for the creator
+                    OutlinedButton(
+                        onClick = { showBidsListDialog = true },
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.MonetizationOn,
+                                contentDescription = "View Bids",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("View Bids")
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = { showBidDialog = true }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.MonetizationOn,
+                                contentDescription = "Place Bid",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Place Bid")
+                        }
+                    }
                 }
-                Button(onClick = { /* Manage assignment */ }) {
-                    Text("Manage")
+            }
+        }
+    }
+
+    if (showBidDialog) {
+        PlaceBidDialog(
+            assignmentId = assignment.id,
+            onDismiss = { showBidDialog = false },
+            onBidPlaced = {
+                showBidDialog = false
+                Toast.makeText(context, "Bid placed successfully!", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    if (showBidsListDialog) {
+        BidsListDialog(
+            assignmentId = assignment.id,
+            onDismiss = { showBidsListDialog = false }
+        )
+    }
+}
+
+@Composable
+fun BidsListDialog(assignmentId: String, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    var bids by remember { mutableStateOf<List<Bid>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(assignmentId) {
+        FirebaseFirestore.getInstance().collection("bids")
+            .whereEqualTo("assignmentId", assignmentId)
+            .get()
+            .addOnSuccessListener { documents ->
+                bids = documents.toObjects(Bid::class.java)
+                isLoading = false
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Error loading bids: ${e.message}", Toast.LENGTH_SHORT).show()
+                isLoading = false
+            }
+    }
+
+    AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surface.copy(0.90f),
+        onDismissRequest = onDismiss,
+        title = { Text("Bids for Assignment") },
+        text = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    bids.isEmpty() -> {
+                        Text(
+                            text = "No bids have been placed on this assignment yet.",
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    else -> {
+                        LazyColumn {
+                            items(bids) { bid ->
+                                BidItem(bid = bid)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+@Composable
+fun BidItem(bid: Bid) {
+    val context = LocalContext.current
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = bid.bidderName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Surface(
+                    color = when(bid.status) {
+                        "accepted" -> MaterialTheme.colorScheme.primaryContainer
+                        "rejected" -> MaterialTheme.colorScheme.errorContainer
+                        else -> MaterialTheme.colorScheme.tertiaryContainer
+                    },
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = bid.status.capitalize(),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Bid Amount: ₹${bid.bidAmount}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Submitted: ${formatTimestamp(bid.timestamp)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (bid.status == "pending") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            updateBidStatus(bid.id, "rejected",context)
+                        },
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Reject")
+                    }
+
+                    Button(
+                        onClick = {
+                            updateBidStatus(bid.id, "accepted",context)
+                        }
+                    ) {
+                        Text("Accept")
+                    }
                 }
             }
         }

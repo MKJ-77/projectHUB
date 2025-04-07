@@ -1,5 +1,7 @@
 package com.example.projecthub.usecases
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -214,4 +217,15 @@ fun getGreeting(): String {
         hour < 17 -> "Good Afternoon"
         else -> "Good Evening"
     }
+}
+fun updateBidStatus(bidId: String, status: String, context: Context) {
+    FirebaseFirestore.getInstance().collection("bids")
+        .document(bidId)
+        .update("status", status)
+        .addOnSuccessListener {
+            Toast.makeText(context, "Bid $status", Toast.LENGTH_SHORT).show()
+        }
+        .addOnFailureListener { e ->
+            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
 }

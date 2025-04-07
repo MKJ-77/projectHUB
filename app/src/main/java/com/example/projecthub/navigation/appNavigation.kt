@@ -10,9 +10,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.projecthub.screens.ChangePasswordScreen
 import com.example.projecthub.screens.EditProfileScreen
 import com.example.projecthub.screens.OnBoardingScreen
@@ -100,8 +102,16 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
         composable(routes.assignmentsScreen.route) {
             assignmentsScreen(navController,authViewModel)
         }
-        composable (routes.assignmentDetailScreen.route){
-            assignmentDetailScreen()
+        composable(
+            route = "${routes.assignmentDetailScreen.route}/{assignmentId}",
+            arguments = listOf(navArgument("assignmentId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val assignmentId = backStackEntry.arguments?.getString("assignmentId") ?: ""
+            assignmentDetailScreen(
+                navController = navController,
+                assignmentId = assignmentId,
+                authViewModel = authViewModel
+            )
         }
 
     })
