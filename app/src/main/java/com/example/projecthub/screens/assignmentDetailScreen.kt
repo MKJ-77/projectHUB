@@ -253,10 +253,11 @@ fun BidCard(bid: Bid, onAccept: (Bid) -> Unit) {
 fun PlaceBidDialog(
     assignmentId: String,
     onDismiss: () -> Unit,
-    onBidPlaced: () -> Unit
+    onBidPlaced: () -> Unit,
+    existingBid: Bid? = null
 ) {
     val context = LocalContext.current
-    var bidAmount by remember { mutableStateOf("") }
+    var bidAmount by remember { mutableStateOf(existingBid?.bidAmount?.toString() ?: "") }
     var isSubmitting by remember { mutableStateOf(false) }
     val currentUser = FirebaseAuth.getInstance().currentUser
     val db = FirebaseFirestore.getInstance()
@@ -274,7 +275,7 @@ fun PlaceBidDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Place a Bid") },
+        title = { Text(if(existingBid != null) "Edit Your Bid" else "Place a Bid") },
         text = {
             Column {
                 Text(
@@ -300,34 +301,53 @@ fun PlaceBidDialog(
                         if (amount != null && amount > 0) {
                             isSubmitting = true
 
-                            // Create a new bid
-                            val newBid = Bid(
-                                id = db.collection("bids").document().id,
-                                assignmentId = assignmentId,
-                                bidderId = currentUser.uid,
-                                bidderName = userName,
-                                bidAmount = amount,
-                                timestamp = Timestamp.now()
-                            )
+                            if (
+                                existingBid != null
+                            ) {
+                                db.collection("bids").document(existingBid.id)
+                                    .update("bidAmount", amount)
+                                    .addOnSuccessListener {
+                                        isSubmitting = false
+                                        onBidPlaced()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        isSubmitting = false
+                                        Toast.makeText(
+                                            context,
+                                            "Error updating bid: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                            } else {
+                                val newBid = Bid(
+                                    id = db.collection("bids").document().id,
+                                    assignmentId = assignmentId,
+                                    bidderId = currentUser.uid,
+                                    bidderName = userName,
+                                    bidAmount = amount,
+                                    timestamp = Timestamp.now()
+                                )
 
-                            db.collection("bids").document(newBid.id)
-                                .set(newBid)
-                                .addOnSuccessListener {
-                                    isSubmitting = false
-                                    onBidPlaced()
-                                }
-                                .addOnFailureListener { e ->
-                                    isSubmitting = false
-                                    Toast.makeText(
-                                        context,
-                                        "Error placing bid: ${e.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                        } else {
+
+                                db.collection("bids").document(newBid.id)
+                                    .set(newBid)
+                                    .addOnSuccessListener {
+                                        isSubmitting = false
+                                        onBidPlaced()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        isSubmitting = false
+                                        Toast.makeText(
+                                            context,
+                                            "Error placing bid: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                            }
+                        }else{
                             Toast.makeText(
                                 context,
-                                "Please enter a valid amount",
+                                "Please enter a valid bid amount",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -341,8 +361,7 @@ fun PlaceBidDialog(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Submit Bid")
-                }
+                    Text(if (existingBid != null) "Update Bid" else "Submit Bid")                }
             }
         },
         dismissButton = {
