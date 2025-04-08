@@ -38,19 +38,47 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun createAssignmentScreen(navController: NavController, authViewModel: authViewModel) {
+fun createAssignmentScreen(
+    navController: NavController,
+    authViewModel: authViewModel,
+    assignmentId: String? = null) {
+
+
+    val isEditMode = assignmentId != null
+    var assignment by remember { mutableStateOf<Assignment?>(null) }
+    var isLoading by remember { mutableStateOf(isEditMode) }
+
+    LaunchedEffect(assignmentId) {
+        if (isEditMode && assignmentId != null) {
+            FirebaseFirestore.getInstance().collection("assignments")
+                .document(assignmentId)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        assignment = document.toObject(Assignment::class.java)?.copy(id = document.id)
+                    }
+                    isLoading = false
+                }
+                .addOnFailureListener {
+                    isLoading = false
+                }
+        }
+    }
+
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
         MaterialTheme.colorScheme.background
     )
 
-    var showDialog by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
     Scaffold(
         topBar = {
-            MainAppBar(title = "Assignments", navController = navController as NavHostController)
-        },
+            MainAppBar(
+                title = if (isEditMode) "Edit Assignment" else "Create Assignment",
+                navController = navController as NavHostController
+            )        },
         bottomBar = {
             bottomNavigationBar(navController = navController as NavHostController, currentRoute = "assignments")
         },
@@ -65,19 +93,30 @@ fun createAssignmentScreen(navController: NavController, authViewModel: authView
             bubbleBackground()
 
 
-            CreateAssignmentDialog(
-                showDialog = showDialog,
-                onDismiss = { showDialog = false },
-                authViewModel = authViewModel,
-                onAssignmentCreated = {
-                    showDialog = false
-                    Toast.makeText(
-                        context,
-                        "Assignment created successfully!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-            )
+            } else {
+                CreateAssignmentDialog(
+                    showDialog = showDialog,
+                    onDismiss = {
+                        showDialog = false
+                        navController.popBackStack()
+                    },
+                    authViewModel = authViewModel,
+                    existingAssignment = assignment,
+                    onAssignmentCreated = {
+                        showDialog = false
+                        Toast.makeText(
+                            context,
+                            if (isEditMode) "Assignment updated successfully!" else "Assignment created successfully!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 }
@@ -88,15 +127,20 @@ fun CreateAssignmentDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     authViewModel: authViewModel,
+    existingAssignment: Assignment? = null,
     onAssignmentCreated: () -> Unit
 ) {
     if (!showDialog) return
 
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var subject by remember { mutableStateOf("") }
-    var deadline by remember { mutableStateOf("") }
-    var budget by remember { mutableStateOf("") }
+    val isEditMode = existingAssignment != null
+
+
+
+    var title by remember { mutableStateOf(existingAssignment?.title ?: "") }
+    var description by remember { mutableStateOf(existingAssignment?.description ?: "") }
+    var subject by remember { mutableStateOf(existingAssignment?.subject ?: "") }
+    var deadline by remember { mutableStateOf(existingAssignment?.deadline ?: "") }
+    var budget by remember { mutableStateOf(existingAssignment?.budget?.toString() ?: "") }
     val showDatePicker = remember { mutableStateOf(false) }
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val context = LocalContext.current
@@ -337,29 +381,55 @@ fun CreateAssignmentDialog(
                         onClick = {
                             if (isFormValid) {
                                 val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
-                                val assignmentRef = db.collection("assignments").document()
-                                val assignment = hashMapOf(
-                                    "id" to assignmentRef.id,
-                                    "title" to title,
-                                    "description" to description,
-                                    "subject" to subject,
-                                    "deadline" to deadline,
-                                    "budget" to (budget.toIntOrNull() ?: 0),
-                                    "createdBy" to userId,
-                                    "timestamp" to FieldValue.serverTimestamp()
-                                )
+//                                val assignmentRef = db.collection("assignments").document()
+                                if (isEditMode && existingAssignment != null) {
+                                    // Update existing assignment
+                                    val assignmentRef = db.collection("assignments").document(existingAssignment.id)
+                                    val updates = hashMapOf<String, Any>(
+                                        "title" to title,
+                                        "description" to description,
+                                        "subject" to subject,
+                                        "deadline" to deadline,
+                                        "budget" to (budget.toIntOrNull() ?: 0)
+                                    )
 
-                                assignmentRef.set(assignment)
-                                    .addOnSuccessListener {
-                                        onAssignmentCreated()
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Toast.makeText(
-                                            context,
-                                            "Failed: ${e.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                    assignmentRef.update(updates)
+                                        .addOnSuccessListener {
+                                            onAssignmentCreated()
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to update: ${e.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }else{
+                                    val assignmentRef = db.collection("assignments").document()
+                                    val assignment = hashMapOf(
+                                        "id" to assignmentRef.id,
+                                        "title" to title,
+                                        "description" to description,
+                                        "subject" to subject,
+                                        "deadline" to deadline,
+                                        "budget" to (budget.toIntOrNull() ?: 0),
+                                        "createdBy" to userId,
+                                        "timestamp" to FieldValue.serverTimestamp()
+                                    )
+
+                                    assignmentRef.set(assignment)
+                                        .addOnSuccessListener {
+                                            onAssignmentCreated()
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Toast.makeText(
+                                                context,
+                                                "Failed: ${e.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+
+                                }
 
                             } else {
                                 Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()

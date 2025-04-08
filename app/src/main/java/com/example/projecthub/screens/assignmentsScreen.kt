@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyRupee
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ManageHistory
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
@@ -57,6 +59,7 @@ import com.example.projecthub.data.Bid
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
+import com.example.projecthub.usecases.checkExistingBid
 import com.example.projecthub.usecases.formatTimestamp
 import com.example.projecthub.usecases.updateBidStatus
 import com.example.projecthub.viewModel.authViewModel
@@ -80,6 +83,11 @@ fun assignmentsScreen(navController: NavHostController,
     val assignmentsState = remember { mutableStateListOf<Assignment>() }
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
+    var assignmentToEdit by remember { mutableStateOf<Assignment?>(null) }
+
+
+
+
     LaunchedEffect(Unit) {
         isLoading = true
         Firebase.firestore.collection("assignments")
@@ -98,6 +106,7 @@ fun assignmentsScreen(navController: NavHostController,
                 isLoading = false
             }
     }
+
 
     Scaffold(
         topBar = {
@@ -137,9 +146,19 @@ fun assignmentsScreen(navController: NavHostController,
                             it.createdBy == currentUserId
                         }
                     }else emptyList()
-                    AvailableAssignmentsList(myAssignments, isLoading,navController)
+                    AvailableAssignmentsList(myAssignments, isLoading,navController,
+
+                        onEditAssignment = { assignment ->
+                            assignmentToEdit = assignment
+                            showDialog = true
+                        }
+                    )
                 }
-                1 -> AvailableAssignmentsList(assignments = assignmentsState,navController = navController)
+                1 -> AvailableAssignmentsList(assignments = assignmentsState,navController = navController,
+                    onEditAssignment = { assignment ->
+                        assignmentToEdit = assignment
+                        showDialog = true
+                    })
             }
 
         }
@@ -147,13 +166,18 @@ fun assignmentsScreen(navController: NavHostController,
     if (showDialog) {
         CreateAssignmentDialog(
             showDialog = showDialog,
-            onDismiss = { showDialog = false },
+            onDismiss = {
+                showDialog = false
+                assignmentToEdit = null  // Clear the assignment being edited
+            },
             authViewModel = authViewModel,
+            existingAssignment = assignmentToEdit,
             onAssignmentCreated = {
                 showDialog = false
+                assignmentToEdit = null  // Clear the assignment being edited
                 Toast.makeText(
                     context,
-                    "Assignment created successfully!",
+                    if (assignmentToEdit != null) "Assignment updated successfully!" else "Assignment created successfully!",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -163,7 +187,7 @@ fun assignmentsScreen(navController: NavHostController,
 }
 
 @Composable
-fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = false,navController: NavHostController) {
+fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = false,navController: NavHostController,onEditAssignment: (Assignment) -> Unit = {}) {
     if(isLoading){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -179,7 +203,11 @@ fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = 
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(assignments) { assignment ->
-                AssignmentCard(assignment, navController)
+                AssignmentCard(
+                    assignment = assignment,
+                    navController = navController,
+                    onEditAssignment = onEditAssignment
+                )
             }
         }
     }
@@ -210,12 +238,25 @@ fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssignmentCard(assignment: Assignment, navController: NavHostController) {
+fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEditAssignment: (Assignment) -> Unit = {}) {
     val context = LocalContext.current
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     val isCreatedByCurrentUser = assignment.createdBy == currentUserId
     var showBidDialog by remember { mutableStateOf(false) }
     var showBidsListDialog by remember { mutableStateOf(false) }
+
+    var hasExistingBid by remember { mutableStateOf(false) }
+    var existingBidData by remember { mutableStateOf<Bid?>(null) }
+
+
+    LaunchedEffect(currentUserId, assignment.id) {
+        currentUserId?.let { userId ->
+            checkExistingBid(assignment.id, userId) { hasBid, existingBid ->
+                hasExistingBid = hasBid
+                existingBidData = existingBid
+            }
+        }
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -294,7 +335,6 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController) {
                 horizontalArrangement = Arrangement.End
             ) {
                 if (isCreatedByCurrentUser) {
-                    // Show management options for the creator
                     OutlinedButton(
                         onClick = { showBidsListDialog = true },
                         modifier = Modifier.padding(end = 8.dp)
@@ -307,20 +347,48 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController) {
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("View Bids")
+
+
                         }
                     }
-                } else {
-                    Button(
-                        onClick = { showBidDialog = true }
+                    OutlinedButton(
+                        onClick = {
+                            onEditAssignment(assignment)
+                        },
+                        modifier = Modifier.padding(end = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                Icons.Default.MonetizationOn,
-                                contentDescription = "Place Bid",
+                                Icons.Default.Edit,
+                                contentDescription = "Edit Assignment",
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Place Bid")
+                            Text("Manage")
+                        }
+                    }
+
+
+                } else {
+                    Button(
+                        onClick = {
+                            currentUserId?.let { userId ->
+                                if (hasExistingBid) {
+                                    showBidDialog = true
+                                } else {
+                                    showBidDialog = true
+                                }
+                            }
+                        }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                if (hasExistingBid) Icons.Default.Edit else Icons.Default.MonetizationOn,
+                                contentDescription = if (hasExistingBid) "Edit Bid" else "Place Bid",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(if (hasExistingBid) "Edit Bid" else "Place Bid")
                         }
                     }
                 }
@@ -331,10 +399,15 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController) {
     if (showBidDialog) {
         PlaceBidDialog(
             assignmentId = assignment.id,
+            existingBid = if (hasExistingBid) existingBidData else null,
             onDismiss = { showBidDialog = false },
             onBidPlaced = {
                 showBidDialog = false
-                Toast.makeText(context, "Bid placed successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    if (hasExistingBid) "Bid updated successfully!" else "Bid placed successfully!",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         )
     }

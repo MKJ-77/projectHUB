@@ -41,6 +41,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.projecthub.data.Bid
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -227,5 +228,28 @@ fun updateBidStatus(bidId: String, status: String, context: Context) {
         }
         .addOnFailureListener { e ->
             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+}
+
+fun checkExistingBid(
+    assignmentId: String,
+    userId: String,
+    onResult: (Boolean, Bid?) -> Unit
+) {
+    FirebaseFirestore.getInstance()
+        .collection("bids")
+        .whereEqualTo("assignmentId", assignmentId)
+        .whereEqualTo("bidderId", userId)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (documents.isEmpty) {
+                onResult(false, null)
+            } else {
+                val existingBid = documents.documents[0].toObject(Bid::class.java)
+                onResult(true, existingBid)
+            }
+        }
+        .addOnFailureListener {
+            onResult(false, null)
         }
 }

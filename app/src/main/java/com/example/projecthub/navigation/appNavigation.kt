@@ -114,6 +114,18 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
             )
         }
 
+        composable(
+            "edit_assignment/{assignmentId}",
+            arguments = listOf(navArgument("assignmentId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val assignmentId = backStackEntry.arguments?.getString("assignmentId")
+            createAssignmentScreen(
+                navController = navController,
+                authViewModel = authViewModel,
+                assignmentId = assignmentId
+            )
+        }
+
     })
 }
 
