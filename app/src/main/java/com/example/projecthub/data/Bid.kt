@@ -9,5 +9,6 @@ data class Bid(
     val bidderName: String = "",
     val bidAmount: Int = 0,
     val status: String = "pending",
+    val enterCompletionDate : String = " ",
     val timestamp: Timestamp = Timestamp.now()
 )

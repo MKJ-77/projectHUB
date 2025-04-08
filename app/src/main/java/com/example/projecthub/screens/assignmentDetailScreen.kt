@@ -16,20 +16,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CurrencyRupee
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,6 +62,9 @@ import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun assignmentDetailScreen(
@@ -137,7 +149,8 @@ fun assignmentDetailScreen(
                         onBidPlaced = {
                             showBidDialog = false
                             Toast.makeText(context, "Bid placed successfully!", Toast.LENGTH_SHORT).show()
-                        }
+                        },
+                        budget = assignmentData.budget
                     )
                 }
             }
@@ -254,12 +267,47 @@ fun PlaceBidDialog(
     assignmentId: String,
     onDismiss: () -> Unit,
     onBidPlaced: () -> Unit,
+    budget : Int,
     existingBid: Bid? = null
 ) {
     val context = LocalContext.current
     var bidAmount by remember { mutableStateOf(existingBid?.bidAmount?.toString() ?: "") }
     var isSubmitting by remember { mutableStateOf(false) }
     val currentUser = FirebaseAuth.getInstance().currentUser
+
+    val showDatePicker = remember { mutableStateOf(false) }
+    val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    var enterDate by remember { mutableStateOf("") }
+
+
+    if (showDatePicker.value) {
+        val currentMillis = System.currentTimeMillis()
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = currentMillis)
+
+
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker.value = false },
+
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        enterDate = dateFormatter.format(Date(it))
+                    }
+                    showDatePicker.value = false
+                }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker.value = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     val db = FirebaseFirestore.getInstance()
 
     var userName by remember { mutableStateOf("") }
@@ -291,14 +339,32 @@ fun PlaceBidDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+
+                OutlinedTextField(
+                    value = enterDate,
+                    onValueChange = { },
+                    label = { Text("Deadline*") },
+                    leadingIcon = { Icon(Icons.Default.DateRange, "Deadline") },
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker.value = true }) {
+                            Icon(Icons.Default.CalendarToday, "Select date")
+                        }
+                    },
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                    ,
+                    shape = RoundedCornerShape(12.dp),
+                )
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    if (bidAmount.isNotBlank() && currentUser != null) {
+                    if (bidAmount.isNotBlank() && currentUser != null && enterDate.isNotBlank()) {
                         val amount = bidAmount.toIntOrNull()
-                        if (amount != null && amount > 0) {
+                        if (amount != null && amount > 0 && amount <= budget) {
                             isSubmitting = true
 
                             if (
@@ -325,6 +391,7 @@ fun PlaceBidDialog(
                                     bidderId = currentUser.uid,
                                     bidderName = userName,
                                     bidAmount = amount,
+                                    enterCompletionDate = enterDate,
                                     timestamp = Timestamp.now()
                                 )
 
@@ -347,13 +414,13 @@ fun PlaceBidDialog(
                         }else{
                             Toast.makeText(
                                 context,
-                                "Please enter a valid bid amount",
+                                "Please enter a valid bid amount (greater than ₹0 and not more than ₹$budget)",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
                 },
-                enabled = !isSubmitting && bidAmount.isNotBlank()
+                enabled = !isSubmitting && bidAmount.isNotBlank() && enterDate.isNotBlank()
             ) {
                 if (isSubmitting) {
                     CircularProgressIndicator(

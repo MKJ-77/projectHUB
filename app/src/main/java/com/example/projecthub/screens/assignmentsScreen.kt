@@ -399,6 +399,7 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
     if (showBidDialog) {
         PlaceBidDialog(
             assignmentId = assignment.id,
+            budget = assignment.budget,
             existingBid = if (hasExistingBid) existingBidData else null,
             onDismiss = { showBidDialog = false },
             onBidPlaced = {
