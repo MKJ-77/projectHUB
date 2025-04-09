@@ -144,10 +144,7 @@ fun assignmentDetailScreen(
                     } else {
                         BidsSection(bids, onAcceptBid = { bid ->
                             updateBidStatus(bid.id, "accepted", context)
-                        },
-                            onBidderProfileClick = { bidderId ->
-                                navController.navigate("user_profile/${bidderId}")
-                            }
+                        }
                         )
                     }
                 }
@@ -167,14 +164,9 @@ fun assignmentDetailScreen(
         }
     }
 
-
 }
-
 @Composable
-fun BidsSection(bids: List<Bid>,
-                onAcceptBid: (Bid) -> Unit,
-                onBidderProfileClick: (String) -> Unit = {}
-                ) {
+fun BidsSection(bids: List<Bid>, onAcceptBid: (Bid) -> Unit, ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Bids (${bids.size})",
@@ -189,11 +181,7 @@ fun BidsSection(bids: List<Bid>,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         } else {
-            bids.forEach { bid ->
-                BidCard(bid,
-                    onAcceptBid,
-                    onBidderProfileClick = onBidderProfileClick
-                )
+            bids.forEach { bid -> BidCard(bid, onAcceptBid)
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -202,27 +190,7 @@ fun BidsSection(bids: List<Bid>,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BidCard(bid: Bid,
-            onAccept: (Bid) -> Unit,
-            onBidderProfileClick: (String) -> Unit = {}
-            ) {
-    val context = LocalContext.current
-    var bidderProfilePhotoId by remember { mutableStateOf(R.drawable.profilephoto1) }
-
-    LaunchedEffect(bid.bidderId) {
-        FirebaseFirestore.getInstance()
-            .collection("users")
-            .document(bid.bidderId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val photoId = document.getLong("profilePhotoId")?.toInt() ?: R.drawable.profilephoto1
-                    bidderProfilePhotoId = photoId
-                }
-            }
-    }
-
-
+fun BidCard(bid: Bid, onAccept: (Bid) -> Unit, ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -237,21 +205,6 @@ fun BidCard(bid: Bid,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable{onBidderProfileClick(bid.bidderId)}
-
-                ){
-                    Image(
-                        painter = painterResource(id = bidderProfilePhotoId),
-                        contentDescription = "Bidder Profile Photo",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
                     Column {
                         Text(
                             text = bid.bidderName,
@@ -264,11 +217,7 @@ fun BidCard(bid: Bid,
                             fontWeight = FontWeight.Bold
                         )
                     }
-
-
-                }
-
-
+            }
                 when (bid.status) {
                     "accepted" -> {
                         Surface(
@@ -314,7 +263,6 @@ fun BidCard(bid: Bid,
             )
         }
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
