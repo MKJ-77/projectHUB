@@ -116,6 +116,7 @@ fun assignmentsScreen(navController: NavHostController,
             bottomNavigationBar(navController = navController, currentRoute = "assignments_page")
         },
 
+
         floatingActionButton = {
             CreateAssignmentFAB(onClick = { showDialog = true })
         },
