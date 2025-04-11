@@ -31,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
@@ -62,6 +63,7 @@ import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.data.Assignment
 import com.example.projecthub.data.Bid
+import com.example.projecthub.data.UserProfileCache
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
@@ -252,10 +254,30 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
     var showBidDialog by remember { mutableStateOf(false) }
     var showBidsListDialog by remember { mutableStateOf(false) }
 
+    var posterName by remember {
+        mutableStateOf(UserProfileCache.getUserName(assignment.createdBy))
+    }
+    var posterPhotoId by remember {
+        mutableStateOf(UserProfileCache.getProfilePhotoId(assignment.createdBy))
+    }
+
     var hasExistingBid by remember { mutableStateOf(false) }
     var existingBidData by remember { mutableStateOf<Bid?>(null) }
 
 
+    LaunchedEffect(assignment.createdBy) {
+        if (posterName == "Unknown User") {
+            FirebaseFirestore.getInstance().collection("users")
+                .document(assignment.createdBy)
+                .get()
+                .addOnSuccessListener { document ->
+                    posterName = document.getString("name") ?: "Unknown User"
+                    document.getLong("profilePhotoId")?.toInt()?.let {
+                        posterPhotoId = it
+                    }
+                }
+        }
+    }
     LaunchedEffect(currentUserId, assignment.id) {
         currentUserId?.let { userId ->
             checkExistingBid(assignment.id, userId) { hasBid, existingBid ->
@@ -282,15 +304,34 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = assignment.subject,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
+                Image(
+                    painter = painterResource(id = posterPhotoId),
+                    contentDescription = "Poster profile photo",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            navController.navigate("user_profile/${assignment.createdBy}")
+                        }
                 )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = posterName,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable {
+                        navController.navigate("user_profile/${assignment.createdBy}")
+                    }
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
 
                 Surface(
                     color = MaterialTheme.colorScheme.primaryContainer,
@@ -304,11 +345,29 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                 }
             }
 
-            Text(
-                text = "Posted: ${formatTimestamp(assignment.timestamp)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            Divider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
             )
+
+            // Assignment details
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = assignment.subject,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    text = "Posted: ${formatTimestamp(assignment.timestamp)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -318,7 +377,7 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = assignment.description,
@@ -354,15 +413,11 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("View Bids")
-
-
                         }
                     }
+
                     OutlinedButton(
-                        onClick = {
-                            onEditAssignment(assignment)
-                        },
-                        modifier = Modifier.padding(end = 8.dp)
+                        onClick = { onEditAssignment(assignment) }
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -374,19 +429,9 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                             Text("Manage")
                         }
                     }
-
-
                 } else {
                     Button(
-                        onClick = {
-                            currentUserId?.let { userId ->
-                                if (hasExistingBid) {
-                                    showBidDialog = true
-                                } else {
-                                    showBidDialog = true
-                                }
-                            }
-                        }
+                        onClick = { showBidDialog = true }
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -402,7 +447,6 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
             }
         }
     }
-
     if (showBidDialog) {
         PlaceBidDialog(
             assignmentId = assignment.id,
