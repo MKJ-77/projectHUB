@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.data.Assignment
+import com.example.projecthub.data.UserProfileCache
 import com.example.projecthub.navigation.routes
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
@@ -65,6 +66,10 @@ fun homePage(
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     val db = FirebaseFirestore.getInstance()
     val currentDate = Calendar.getInstance().time
+
+    LaunchedEffect(Unit) {
+        UserProfileCache.preloadUserProfiles()
+    }
 
     LaunchedEffect(userId){
         isLoading = true

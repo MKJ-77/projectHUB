@@ -76,12 +76,11 @@ import java.util.Locale
 @Composable
 fun assignmentDetailScreen(
     navController: NavHostController,
-    assignmentId : String,
+    assignmentId: String,
     authViewModel: authViewModel
-){
+) {
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     var assignment by remember { mutableStateOf<Assignment?>(null) }
-    var bids by remember { mutableStateOf<List<Bid>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var showBidDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -113,16 +112,16 @@ fun assignmentDetailScreen(
             navController.popBackStack()
         }
     }
+
     Scaffold(
         topBar = { MainAppBar(title = "Assignment Details", navController = navController) },
         bottomBar = { bottomNavigationBar(navController = navController, currentRoute = "assignment_details") }
-    ){
-        paddingValues ->
+    ) { paddingValues ->
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        }else{
+        } else {
             assignment?.let { assignmentData ->
                 Column(
                     modifier = Modifier
@@ -141,11 +140,6 @@ fun assignmentDetailScreen(
                         ) {
                             Text("Place Bid")
                         }
-                    } else {
-                        BidsSection(bids, onAcceptBid = { bid ->
-                            updateBidStatus(bid.id, "accepted", context)
-                        }
-                        )
                     }
                 }
 
@@ -163,106 +157,7 @@ fun assignmentDetailScreen(
             }
         }
     }
-
 }
-@Composable
-fun BidsSection(bids: List<Bid>, onAcceptBid: (Bid) -> Unit, ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Bids (${bids.size})",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        if (bids.isEmpty()) {
-            Text(
-                text = "No bids yet",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-        } else {
-            bids.forEach { bid -> BidCard(bid, onAcceptBid)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BidCard(bid: Bid, onAccept: (Bid) -> Unit, ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                    Column {
-                        Text(
-                            text = bid.bidderName,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = "Bid: ₹${bid.bidAmount}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-            }
-                when (bid.status) {
-                    "accepted" -> {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = "Accepted",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                    "rejected" -> {
-                        Surface(
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = "Rejected",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                    else -> {
-                        Button(
-                            onClick = { onAccept(bid) },
-                            modifier = Modifier.padding(top = 8.dp)
-                        ) {
-                            Text("Accept Bid")
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Submitted: ${formatTimestamp(bid.timestamp)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

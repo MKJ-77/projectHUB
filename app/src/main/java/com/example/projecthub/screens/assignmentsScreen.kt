@@ -1,7 +1,9 @@
 package com.example.projecthub.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyRupee
@@ -28,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
@@ -49,13 +53,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.projecthub.R
 import com.example.projecthub.data.Assignment
 import com.example.projecthub.data.Bid
+import com.example.projecthub.data.UserProfileCache
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
@@ -246,10 +254,30 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
     var showBidDialog by remember { mutableStateOf(false) }
     var showBidsListDialog by remember { mutableStateOf(false) }
 
+    var posterName by remember {
+        mutableStateOf(UserProfileCache.getUserName(assignment.createdBy))
+    }
+    var posterPhotoId by remember {
+        mutableStateOf(UserProfileCache.getProfilePhotoId(assignment.createdBy))
+    }
+
     var hasExistingBid by remember { mutableStateOf(false) }
     var existingBidData by remember { mutableStateOf<Bid?>(null) }
 
 
+    LaunchedEffect(assignment.createdBy) {
+        if (posterName == "Unknown User") {
+            FirebaseFirestore.getInstance().collection("users")
+                .document(assignment.createdBy)
+                .get()
+                .addOnSuccessListener { document ->
+                    posterName = document.getString("name") ?: "Unknown User"
+                    document.getLong("profilePhotoId")?.toInt()?.let {
+                        posterPhotoId = it
+                    }
+                }
+        }
+    }
     LaunchedEffect(currentUserId, assignment.id) {
         currentUserId?.let { userId ->
             checkExistingBid(assignment.id, userId) { hasBid, existingBid ->
@@ -276,15 +304,34 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = assignment.subject,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
+                Image(
+                    painter = painterResource(id = posterPhotoId),
+                    contentDescription = "Poster profile photo",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            navController.navigate("user_profile/${assignment.createdBy}")
+                        }
                 )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = posterName,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable {
+                        navController.navigate("user_profile/${assignment.createdBy}")
+                    }
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
 
                 Surface(
                     color = MaterialTheme.colorScheme.primaryContainer,
@@ -298,11 +345,29 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                 }
             }
 
-            Text(
-                text = "Posted: ${formatTimestamp(assignment.timestamp)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            Divider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
             )
+
+            // Assignment details
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = assignment.subject,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    text = "Posted: ${formatTimestamp(assignment.timestamp)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -312,7 +377,7 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = assignment.description,
@@ -348,15 +413,11 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("View Bids")
-
-
                         }
                     }
+
                     OutlinedButton(
-                        onClick = {
-                            onEditAssignment(assignment)
-                        },
-                        modifier = Modifier.padding(end = 8.dp)
+                        onClick = { onEditAssignment(assignment) }
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -368,19 +429,9 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                             Text("Manage")
                         }
                     }
-
-
                 } else {
                     Button(
-                        onClick = {
-                            currentUserId?.let { userId ->
-                                if (hasExistingBid) {
-                                    showBidDialog = true
-                                } else {
-                                    showBidDialog = true
-                                }
-                            }
-                        }
+                        onClick = { showBidDialog = true }
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -396,7 +447,6 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
             }
         }
     }
-
     if (showBidDialog) {
         PlaceBidDialog(
             assignmentId = assignment.id,
@@ -417,18 +467,21 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
     if (showBidsListDialog) {
         BidsListDialog(
             assignmentId = assignment.id,
+            navController = navController,
             onDismiss = { showBidsListDialog = false }
         )
     }
 }
 
 @Composable
-fun BidsListDialog(assignmentId: String, onDismiss: () -> Unit) {
+fun BidsListDialog(assignmentId: String,navController: NavHostController, onDismiss: () -> Unit) {
     val context = LocalContext.current
     var bids by remember { mutableStateOf<List<Bid>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var refreshTrigger by remember { mutableStateOf(0) }
 
-    LaunchedEffect(assignmentId) {
+    fun loadBids() {
+        isLoading = true
         FirebaseFirestore.getInstance().collection("bids")
             .whereEqualTo("assignmentId", assignmentId)
             .get()
@@ -440,6 +493,9 @@ fun BidsListDialog(assignmentId: String, onDismiss: () -> Unit) {
                 Toast.makeText(context, "Error loading bids: ${e.message}", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
+    }
+    LaunchedEffect(assignmentId, refreshTrigger) {
+        loadBids()
     }
 
     AlertDialog(
@@ -467,7 +523,9 @@ fun BidsListDialog(assignmentId: String, onDismiss: () -> Unit) {
                     else -> {
                         LazyColumn {
                             items(bids) { bid ->
-                                BidItem(bid = bid)
+                                BidItem(bid = bid, navController= navController,onStatusChanged = {
+                                    refreshTrigger++
+                                })
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
@@ -484,8 +542,22 @@ fun BidsListDialog(assignmentId: String, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun BidItem(bid: Bid) {
+fun BidItem(bid: Bid, navController: NavHostController, onStatusChanged: () -> Unit = {}) {
     val context = LocalContext.current
+    var profilePhotoResId by remember { mutableStateOf(R.drawable.profilephoto1) }
+
+
+    LaunchedEffect(bid.bidderId) {
+        FirebaseFirestore.getInstance().collection("users")
+            .document(bid.bidderId)
+            .get()
+            .addOnSuccessListener { document ->
+                document.getLong("profilePhotoId")?.toInt()?.let {
+                    profilePhotoResId = it
+                }
+            }
+    }
+
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -501,11 +573,30 @@ fun BidItem(bid: Bid) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Row(
+                verticalAlignment = Alignment.CenterVertically,
+
+            ) {
+                Image(
+                    painter = painterResource(id = profilePhotoResId),
+                    contentDescription = "Bidder profile photo",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            navController.navigate("user_profile/${bid.bidderId}")
+                        }
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
                 Text(
+                    modifier = Modifier.clickable { navController.navigate("user_profile/${bid.bidderId}")},
                     text = bid.bidderName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
+            }
 
                 Surface(
                     color = when(bid.status) {
@@ -548,7 +639,9 @@ fun BidItem(bid: Bid) {
                 ) {
                     OutlinedButton(
                         onClick = {
-                            updateBidStatus(bid.id, "rejected",context)
+                            updateBidStatus(bid.id, "rejected",context){
+                                onStatusChanged()
+                            }
                         },
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
@@ -557,7 +650,9 @@ fun BidItem(bid: Bid) {
 
                     Button(
                         onClick = {
-                            updateBidStatus(bid.id, "accepted",context)
+                            updateBidStatus(bid.id, "accepted", context) {
+                                onStatusChanged()
+                            }
                         }
                     ) {
                         Text("Accept")
