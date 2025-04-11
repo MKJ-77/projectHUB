@@ -434,8 +434,10 @@ fun BidsListDialog(assignmentId: String,navController: NavHostController, onDism
     val context = LocalContext.current
     var bids by remember { mutableStateOf<List<Bid>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var refreshTrigger by remember { mutableStateOf(0) }
 
-    LaunchedEffect(assignmentId) {
+    fun loadBids() {
+        isLoading = true
         FirebaseFirestore.getInstance().collection("bids")
             .whereEqualTo("assignmentId", assignmentId)
             .get()
@@ -447,6 +449,9 @@ fun BidsListDialog(assignmentId: String,navController: NavHostController, onDism
                 Toast.makeText(context, "Error loading bids: ${e.message}", Toast.LENGTH_SHORT).show()
                 isLoading = false
             }
+    }
+    LaunchedEffect(assignmentId, refreshTrigger) {
+        loadBids()
     }
 
     AlertDialog(
@@ -474,7 +479,9 @@ fun BidsListDialog(assignmentId: String,navController: NavHostController, onDism
                     else -> {
                         LazyColumn {
                             items(bids) { bid ->
-                                BidItem(bid = bid, navController= navController)
+                                BidItem(bid = bid, navController= navController,onStatusChanged = {
+                                    refreshTrigger++
+                                })
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
@@ -491,7 +498,7 @@ fun BidsListDialog(assignmentId: String,navController: NavHostController, onDism
 }
 
 @Composable
-fun BidItem(bid: Bid, navController: NavHostController) {
+fun BidItem(bid: Bid, navController: NavHostController, onStatusChanged: () -> Unit = {}) {
     val context = LocalContext.current
     var profilePhotoResId by remember { mutableStateOf(R.drawable.profilephoto1) }
 
@@ -588,7 +595,9 @@ fun BidItem(bid: Bid, navController: NavHostController) {
                 ) {
                     OutlinedButton(
                         onClick = {
-                            updateBidStatus(bid.id, "rejected",context)
+                            updateBidStatus(bid.id, "rejected",context){
+                                onStatusChanged()
+                            }
                         },
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
@@ -597,7 +606,9 @@ fun BidItem(bid: Bid, navController: NavHostController) {
 
                     Button(
                         onClick = {
-                            updateBidStatus(bid.id, "accepted",context)
+                            updateBidStatus(bid.id, "accepted", context) {
+                                onStatusChanged()
+                            }
                         }
                     ) {
                         Text("Accept")

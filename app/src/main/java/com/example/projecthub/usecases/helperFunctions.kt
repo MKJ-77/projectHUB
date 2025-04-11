@@ -219,12 +219,13 @@ fun getGreeting(): String {
         else -> "Good Evening"
     }
 }
-fun updateBidStatus(bidId: String, status: String, context: Context) {
+fun updateBidStatus(bidId: String, status: String, context: Context, onSuccess: () -> Unit = {}) {
     FirebaseFirestore.getInstance().collection("bids")
         .document(bidId)
         .update("status", status)
         .addOnSuccessListener {
             Toast.makeText(context, "Bid $status", Toast.LENGTH_SHORT).show()
+            onSuccess() // Call the callback when successful
         }
         .addOnFailureListener { e ->
             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
