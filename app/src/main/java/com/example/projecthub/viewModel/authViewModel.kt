@@ -174,12 +174,12 @@ class authViewModel(application: Application): AndroidViewModel(application) {
         _authState.value = AuthState.Loading
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener{task->
-            if (task.isSuccessful){
-               _authState.value =  AuthState.Error("Reset password email has been sent!!")
-            }else{
-                _authState.value = AuthState.Error("Error sending reset email")
+                if (task.isSuccessful){
+                    _authState.value =  AuthState.Error("Reset password email has been sent!!")
+                }else{
+                    _authState.value = AuthState.Error("Error sending reset email")
+                }
             }
-        }
     }
 
 
@@ -267,11 +267,10 @@ class authViewModel(application: Application): AndroidViewModel(application) {
     private val _messages = MutableStateFlow<List<message>>(emptyList())
     val messages : StateFlow<List<message>> = _messages
 
-    fun startListeningMessages(chatChannelId : String) {
-        messageListener = listenForMessages(chatChannelId){ fetchedMessages ->
-
+    fun startListeningMessages(chatChannelId: String) {
+        messageListener = listenForMessages(chatChannelId) { fetchedMessages ->
+            _messages.value = fetchedMessages
         }
-
     }
 
     fun stopListeningMessages() {
