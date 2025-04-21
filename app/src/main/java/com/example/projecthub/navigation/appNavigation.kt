@@ -22,6 +22,7 @@ import com.example.projecthub.screens.ProfileSetupScreen
 import com.example.projecthub.screens.userProfileScreen
 import com.example.projecthub.screens.assignmentDetailScreen
 import com.example.projecthub.screens.assignmentsScreen
+import com.example.projecthub.screens.bidderProfileScreen
 import com.example.projecthub.screens.createAssignmentScreen
 import com.example.projecthub.screens.homePage
 import com.example.projecthub.screens.loginPage
@@ -133,6 +134,13 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: ""
             userProfileScreen(navController = navController, userId = userId)
+        }
+
+        composable("profile/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            userId?.let {
+                bidderProfileScreen(userId = it, navController = navController)
+            }
         }
 
     })

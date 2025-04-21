@@ -78,7 +78,7 @@ fun assignmentDetailScreen(
     navController: NavHostController,
     assignmentId: String,
     authViewModel: authViewModel
-) {
+){
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     var assignment by remember { mutableStateOf<Assignment?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -116,12 +116,13 @@ fun assignmentDetailScreen(
     Scaffold(
         topBar = { MainAppBar(title = "Assignment Details", navController = navController) },
         bottomBar = { bottomNavigationBar(navController = navController, currentRoute = "assignment_details") }
-    ) { paddingValues ->
+    ){
+        paddingValues ->
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        } else {
+        }else{
             assignment?.let { assignmentData ->
                 Column(
                     modifier = Modifier
@@ -157,6 +158,7 @@ fun assignmentDetailScreen(
             }
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

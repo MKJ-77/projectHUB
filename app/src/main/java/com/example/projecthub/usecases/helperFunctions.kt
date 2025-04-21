@@ -1,6 +1,7 @@
 package com.example.projecthub.usecases
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -40,10 +41,17 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat.MessagingStyle.Message
 import androidx.navigation.NavController
+import com.example.projecthub.data.Assignment
 import com.example.projecthub.data.Bid
+import com.example.projecthub.data.chatChannel
+import com.example.projecthub.data.message
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.toObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -224,18 +232,162 @@ fun getGreeting(): String {
         else -> "Good Evening"
     }
 }
-fun updateBidStatus(bidId: String, status: String, context: Context, onSuccess: () -> Unit = {}) {
-    FirebaseFirestore.getInstance().collection("bids")
-        .document(bidId)
-        .update("status", status)
+
+fun updateBidStatus(
+    bidId: String,
+    status: String,
+    context: Context,
+    onSuccess: () -> Unit = {}) {
+    val db =FirebaseFirestore.getInstance()
+        val bidRef = db.collection("bids").document(bidId)
+        bidRef.update("status", status)
         .addOnSuccessListener {
             Toast.makeText(context, "Bid $status", Toast.LENGTH_SHORT).show()
-            onSuccess() // Call the callback when successful
+
+            if (status == "accepted"){
+                bidRef.get()
+                    .addOnSuccessListener { document->
+                        val bid = document.toObject(Bid::class.java)
+
+                        bid?.let {
+                            val assignmentRef = db.collection("assignments").document(it.assignmentId)
+
+                            assignmentRef.get()
+                                .addOnSuccessListener { assignmentDoc->
+                                    val assignment = assignmentDoc.toObject(Assignment::class.java)
+
+                                    assignment?.let { a->
+                                        val posterId =a.createdBy
+
+                                        createChannel(
+                                            assignmentId = it.assignmentId,
+                                            bidderId = it.bidderId,
+                                            posterId = posterId
+                                        ){chatChannelId->
+                                            Toast.makeText(context,"chat created : $chatChannelId",Toast.LENGTH_SHORT).show()
+                                            onSuccess()
+                                        }
+                                    }
+                                }
+                        }
+                    }
+            }else{
+                onSuccess() // Call the callback when successful
+            }
         }
         .addOnFailureListener { e ->
             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
 }
+
+
+fun createChannel(
+    assignmentId: String,
+    bidderId: String,
+    posterId: String,
+    onChannelCreated: (String) -> Unit,
+){
+    val  db = FirebaseFirestore.getInstance()
+    val chatChannelsRef = db.collection("chatChannels")
+
+    chatChannelsRef
+        .whereEqualTo("assignmentId",assignmentId)
+        .whereEqualTo("bidderId",bidderId)
+        .whereEqualTo("posterId",posterId)
+        .get()
+        .addOnSuccessListener { querySnapshot->
+            if (!querySnapshot.isEmpty){
+                onChannelCreated(querySnapshot.documents[0].id)
+            }else{
+                val newChannel = chatChannel(
+                    assignmentId =assignmentId,
+                    bidderId = bidderId,
+                    posterId = posterId
+                )
+
+                chatChannelsRef.add(newChannel)
+                    .addOnSuccessListener { documentRef ->
+                        onChannelCreated(documentRef.id)
+                    }
+            }
+        }
+        .addOnFailureListener {
+            Log.e("Chat", "Failed to create or fetch chat channel", it)
+        }
+}
+
+
+fun sendMessage(
+    chatChannelId : String,
+    messageText : String,
+    senderId : String,
+    onComplete: () -> Unit = {},
+) {
+    val db = FirebaseFirestore.getInstance()
+    val messageRef = db.collection("chatChannels").document(chatChannelId).collection("messages").document()
+    val message = message(
+        messageId = messageRef.id,
+        senderId =senderId,
+        text = messageText,
+    )
+
+    messageRef.set(message)
+        .addOnSuccessListener {
+            onComplete()
+        }
+        .addOnFailureListener{e->
+            Log.e("SendMessage", "Error sending message: ${e.message}")
+        }
+}
+
+fun fetchMessage(
+    chatChannelId: String,
+    onMesageFetched :(List<message>) -> Unit
+){
+    val db = FirebaseFirestore.getInstance()
+    val  messageRef = db.collection("chatChannels")
+        .document(chatChannelId)
+        .collection("messages")
+    messageRef.orderBy("timeStamp")
+        .get()
+        .addOnSuccessListener { result->
+            val messages = mutableListOf<message>()
+            for (document in result){
+                val message = document.toObject(message::class.java)
+                messages.add(message)
+            }
+            onMesageFetched(messages)
+        }
+        .addOnFailureListener { e ->
+            Log.e("FetchMessages", "Error fetching messages: ${e.message}")
+        }
+
+}
+
+fun listenForMessages(
+    chatChannelId: String,
+    onMessageReceived : (List<message>)-> Unit
+): ListenerRegistration{
+    val db = FirebaseFirestore.getInstance()
+
+    return db.collection("chatChannels")
+        .document(chatChannelId)
+        .collection("messages")
+        .orderBy("timeStamp",Query.Direction.ASCENDING)
+        .addSnapshotListener{ snapshot , error ->
+            if (error !=null ){
+                Log.e("Firestore", "Listen failed: ${error.message}")
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && !snapshot.isEmpty) {
+                val messages = snapshot.documents.mapNotNull { it.toObject(message::class.java) }
+                onMessageReceived(messages)
+            }
+        }
+
+}
+
 
 fun checkExistingBid(
     assignmentId: String,

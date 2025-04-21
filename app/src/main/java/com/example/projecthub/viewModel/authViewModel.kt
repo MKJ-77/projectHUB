@@ -3,13 +3,23 @@ package com.example.projecthub.viewModel
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import androidx.test.espresso.core.internal.deps.dagger.multibindings.StringKey
+import com.example.projecthub.data.message
 import com.example.projecthub.navigation.routes
+import com.example.projecthub.usecases.listenForMessages
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.util.UUID
 
 class authViewModel(application: Application): AndroidViewModel(application) {
     private val auth : FirebaseAuth = FirebaseAuth.getInstance()
@@ -253,6 +263,20 @@ class authViewModel(application: Application): AndroidViewModel(application) {
             }
     }
 
+    private var messageListener : ListenerRegistration? = null
+    private val _messages = MutableStateFlow<List<message>>(emptyList())
+    val messages : StateFlow<List<message>> = _messages
+
+    fun startListeningMessages(chatChannelId : String) {
+        messageListener = listenForMessages(chatChannelId){ fetchedMessages ->
+
+        }
+
+    }
+
+    fun stopListeningMessages() {
+        messageListener?.remove()
+    }
 }
 
 sealed class AuthState{

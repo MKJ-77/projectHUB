@@ -1,8 +1,8 @@
 package com.example.projecthub.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ManageHistory
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
@@ -35,7 +34,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -43,7 +41,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,6 +61,7 @@ import com.example.projecthub.R
 import com.example.projecthub.data.Assignment
 import com.example.projecthub.data.Bid
 import com.example.projecthub.data.UserProfileCache
+import com.example.projecthub.data.chatChannel
 import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
@@ -78,8 +76,9 @@ import com.google.firebase.firestore.firestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun assignmentsScreen(navController: NavHostController,
-                      authViewModel: authViewModel = viewModel()
+fun assignmentsScreen(
+    navController: NavHostController,
+    authViewModel: authViewModel = viewModel(),
 ) {
     var isLoading by remember { mutableStateOf(true) }
 
@@ -662,6 +661,8 @@ fun BidItem(bid: Bid, navController: NavHostController, onStatusChanged: () -> U
         }
     }
 }
+
+
 
 @Composable
 fun InfoChip(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
