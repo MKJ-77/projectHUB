@@ -4,9 +4,14 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -33,25 +38,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.projecthub.navigation.routes
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat.MessagingStyle.Message
-import androidx.navigation.NavController
+import androidx.compose.ui.text.style.TextAlign
 import com.example.projecthub.data.Assignment
 import com.example.projecthub.data.Bid
 import com.example.projecthub.data.chatChannel
 import com.example.projecthub.data.message
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.toObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -95,10 +93,14 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
         NavigationBarItem(
             icon = { Icon(Icons.Default.Email, contentDescription = "Messages") },
             label = { Text("Messages") },
-            selected = currentRoute == "messages",
+            selected = currentRoute == "messages_list",
             onClick = {
-                //Navigate to messages screen
-
+                if (currentRoute != "messages_list") {
+                    navController.navigate(routes.messagesListScreen.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                }
             }
         )
 
@@ -218,6 +220,11 @@ fun formatTimestamp(timestamp: Timestamp): String {
     val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     return sdf.format(timestamp.toDate())
 }
+// Fix the formatTimeStamp function - Date objects don't have a toDate() method
+fun formatTimeStamp(date: Date): String {
+    val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    return sdf.format(date)
+}
 
 fun getCurrentDate(): String {
     val dateFormat = SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault())
@@ -232,15 +239,39 @@ fun getGreeting(): String {
         else -> "Good Evening"
     }
 }
+@Composable
+fun NoChannelsMessage(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            "No conversations yet",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Medium
+        )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            "When you accept a bid, a chat will be created here",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+// In updateBidStatus function, replace createChannel with createOrGetChannel
 fun updateBidStatus(
     bidId: String,
     status: String,
     context: Context,
     onSuccess: () -> Unit = {}) {
-    val db =FirebaseFirestore.getInstance()
-        val bidRef = db.collection("bids").document(bidId)
-        bidRef.update("status", status)
+    val db = FirebaseFirestore.getInstance()
+    val bidRef = db.collection("bids").document(bidId)
+    bidRef.update("status", status)
         .addOnSuccessListener {
             Toast.makeText(context, "Bid $status", Toast.LENGTH_SHORT).show()
 
@@ -257,13 +288,12 @@ fun updateBidStatus(
                                     val assignment = assignmentDoc.toObject(Assignment::class.java)
 
                                     assignment?.let { a->
-                                        val posterId =a.createdBy
+                                        val posterId = a.createdBy
 
-                                        createChannel(
-                                            assignmentId = it.assignmentId,
-                                            bidderId = it.bidderId,
-                                            posterId = posterId
-                                        ){chatChannelId->
+                                        // Replace createChannel with createOrGetChannel
+                                        createOrGetChannel(
+                                            otherUserId = it.bidderId
+                                        ){ chatChannelId ->
                                             Toast.makeText(context,"chat created : $chatChannelId",Toast.LENGTH_SHORT).show()
                                             onSuccess()
                                         }
@@ -271,121 +301,135 @@ fun updateBidStatus(
                                 }
                         }
                     }
-            }else{
-                onSuccess() // Call the callback when successful
+            } else {
+                onSuccess()
             }
         }
         .addOnFailureListener { e ->
             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
 }
-
-
-fun createChannel(
-    assignmentId: String,
-    bidderId: String,
-    posterId: String,
+fun createOrGetChannel(
+    otherUserId: String,
     onChannelCreated: (String) -> Unit,
-){
-    val  db = FirebaseFirestore.getInstance()
+) {
+    val db = FirebaseFirestore.getInstance()
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val chatChannelsRef = db.collection("chatChannels")
 
-    chatChannelsRef
-        .whereEqualTo("assignmentId",assignmentId)
-        .whereEqualTo("bidderId",bidderId)
-        .whereEqualTo("posterId",posterId)
-        .get()
-        .addOnSuccessListener { querySnapshot->
-            if (!querySnapshot.isEmpty){
-                onChannelCreated(querySnapshot.documents[0].id)
-            }else{
-                val newChannel = chatChannel(
-                    assignmentId =assignmentId,
-                    bidderId = bidderId,
-                    posterId = posterId
-                )
+    // Query where current user is user1 and other is user2
+    val query1 = chatChannelsRef
+        .whereEqualTo("user1Id", currentUserId)
+        .whereEqualTo("user2Id", otherUserId)
 
-                chatChannelsRef.add(newChannel)
-                    .addOnSuccessListener { documentRef ->
-                        onChannelCreated(documentRef.id)
-                    }
+    // Query where current user is user2 and other is user1
+    val query2 = chatChannelsRef
+        .whereEqualTo("user1Id", otherUserId)
+        .whereEqualTo("user2Id", currentUserId)
+
+    // First try to find existing channel
+    query1.get().addOnSuccessListener { querySnapshot ->
+        if (!querySnapshot.isEmpty) {
+            onChannelCreated(querySnapshot.documents[0].id)
+        } else {
+            // If not found in first query, try second
+            query2.get().addOnSuccessListener { querySnapshot2 ->
+                if (!querySnapshot2.isEmpty) {
+                    onChannelCreated(querySnapshot2.documents[0].id)
+                } else {
+                    // Create new channel if none exists
+                    val newChannel = chatChannel(
+                        user1Id = currentUserId,
+                        user2Id = otherUserId
+                    )
+
+                    chatChannelsRef.add(newChannel)
+                        .addOnSuccessListener { documentRef ->
+                            onChannelCreated(documentRef.id)
+                        }
+                }
             }
         }
-        .addOnFailureListener {
-            Log.e("Chat", "Failed to create or fetch chat channel", it)
-        }
+    }
 }
-
-
 fun sendMessage(
-    chatChannelId : String,
-    messageText : String,
-    senderId : String,
-    onComplete: () -> Unit = {},
+    chatChannelId: String,
+    messageText: String,
+    senderId: String,
+    onComplete: () -> Unit = {}
 ) {
     val db = FirebaseFirestore.getInstance()
     val messageRef = db.collection("chatChannels").document(chatChannelId).collection("messages").document()
     val message = message(
         messageId = messageRef.id,
-        senderId =senderId,
-        text = messageText,
+        senderId = senderId,
+        text = messageText
     )
 
+    // Add the message to the messages subcollection
     messageRef.set(message)
         .addOnSuccessListener {
-            onComplete()
+            // Also update the channel with last message info
+            db.collection("chatChannels").document(chatChannelId)
+                .update(
+                    mapOf(
+                        "lastMessageText" to messageText,
+                        "lastMessageTimestamp" to Timestamp.now()
+                    )
+                )
+                .addOnSuccessListener {
+                    onComplete()
+                }
         }
-        .addOnFailureListener{e->
+        .addOnFailureListener { e ->
             Log.e("SendMessage", "Error sending message: ${e.message}")
         }
 }
 
-fun fetchMessage(
-    chatChannelId: String,
-    onMesageFetched :(List<message>) -> Unit
-){
-    val db = FirebaseFirestore.getInstance()
-    val  messageRef = db.collection("chatChannels")
-        .document(chatChannelId)
-        .collection("messages")
-    messageRef.orderBy("timeStamp")
-        .get()
-        .addOnSuccessListener { result->
-            val messages = mutableListOf<message>()
-            for (document in result){
-                val message = document.toObject(message::class.java)
-                messages.add(message)
-            }
-            onMesageFetched(messages)
-        }
-        .addOnFailureListener { e ->
-            Log.e("FetchMessages", "Error fetching messages: ${e.message}")
-        }
-
-}
+//fun fetchMessage(
+//    chatChannelId: String,
+//    onMesageFetched :(List<message>) -> Unit
+//){
+//    val db = FirebaseFirestore.getInstance()
+//    val messageRef = db.collection("chatChannels")
+//        .document(chatChannelId)
+//        .collection("messages")
+//    messageRef.orderBy("timestamp") // Fixed field name casing
+//        .get()
+//        .addOnSuccessListener { result->
+//            val messages = mutableListOf<message>()
+//            for (document in result){
+//                val message = document.toObject(message::class.java)
+//                messages.add(message)
+//            }
+//            onMesageFetched(messages)
+//        }
+//        .addOnFailureListener { e ->
+//            Log.e("FetchMessages", "Error fetching messages: ${e.message}")
+//        }
+//}
 
 fun listenForMessages(
     chatChannelId: String,
-    onMessageReceived : (List<message>)-> Unit
-): ListenerRegistration{
+    onMessageReceived: (List<message>) -> Unit
+): ListenerRegistration {
     val db = FirebaseFirestore.getInstance()
 
     return db.collection("chatChannels")
         .document(chatChannelId)
         .collection("messages")
-        .orderBy("timeStamp",Query.Direction.ASCENDING)
-        .addSnapshotListener{ snapshot , error ->
-            if (error !=null ){
+        .orderBy("timestamp", Query.Direction.ASCENDING) // Fix casing here
+        .addSnapshotListener { snapshot, error ->
+            if (error != null) {
                 Log.e("Firestore", "Listen failed: ${error.message}")
                 return@addSnapshotListener
             }
 
-            if (snapshot != null && !snapshot.isEmpty) {
+            if (snapshot != null) {
                 val messages = snapshot.documents.mapNotNull { it.toObject(message::class.java) }
                 onMessageReceived(messages)
             }
         }
-
 }
 
 

@@ -16,7 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.projecthub.screens.ChangePasswordScreen
+import com.example.projecthub.screens.ChatScreen
 import com.example.projecthub.screens.EditProfileScreen
+import com.example.projecthub.screens.MessageListScreen
 import com.example.projecthub.screens.OnBoardingScreen
 import com.example.projecthub.screens.ProfileSetupScreen
 import com.example.projecthub.screens.userProfileScreen
@@ -141,6 +143,19 @@ fun appNavigation(modifier: Modifier,authViewModel: authViewModel,
             userId?.let {
                 bidderProfileScreen(userId = it, navController = navController)
             }
+        }
+
+        // Add these to appNavigation.kt inside the NavHost builder
+        composable(routes.messagesListScreen.route) {
+            MessageListScreen(navController, authViewModel)
+        }
+
+        composable(
+            route = routes.chatScreen.route,
+            arguments = listOf(navArgument("chatChannelId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val chatChannelId = backStackEntry.arguments?.getString("chatChannelId") ?: ""
+            ChatScreen(navController, chatChannelId)
         }
 
     })
