@@ -1,9 +1,12 @@
 package com.example.projecthub.usecases
 
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,11 +43,15 @@ import androidx.navigation.NavHostController
 import com.example.projecthub.navigation.routes
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import com.example.projecthub.data.Assignment
 import com.example.projecthub.data.Bid
 import com.example.projecthub.data.chatChannel
 import com.example.projecthub.data.message
+import com.example.projecthub.ui.theme.PaperWhite
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -54,6 +61,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.random.Random
 
 @Composable
 fun bottomNavigationBar(navController: NavHostController, currentRoute: String) {
@@ -454,4 +462,39 @@ fun checkExistingBid(
         .addOnFailureListener {
             onResult(false, null)
         }
+}
+
+
+@Composable
+fun chatWallpaperBackground(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize()) {
+        val random = java.util.Random()
+        val numberOfParticles = 150
+        repeat(numberOfParticles) { index ->
+            val size = (12 + random.nextInt(16)).dp
+            val xOffset = random.nextInt(800) - 200
+            val yOffset = random.nextInt(1200) - 200
+
+            Box(
+                modifier = Modifier
+                    .size(size)
+                    .offset(
+                        x = xOffset.dp,
+                        y = yOffset.dp
+                    )
+                    .clip(CircleShape)
+                    .background(
+                        when (index % 5) {
+                            0 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            1 -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                            2 -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.17f)
+                            3 -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.12f)
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.10f)
+                        }
+                    )
+
+
+            )
+        }
+    }
 }

@@ -152,11 +152,17 @@ fun CreateAssignmentDialog(
 
     if (showDatePicker.value) {
         val currentMillis = System.currentTimeMillis()
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = currentMillis)
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = currentMillis,
+            selectableDates = object : SelectableDates{
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return utcTimeMillis >= currentMillis
+                }
+            }
+        )
 
         DatePickerDialog(
             onDismissRequest = { showDatePicker.value = false },
-
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let {
