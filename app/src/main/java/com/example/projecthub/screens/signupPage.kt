@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.projecthub.navigation.routes
 import com.example.projecthub.viewModel.AuthState
 import com.example.projecthub.viewModel.authViewModel
 
@@ -331,6 +332,14 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
 
                     is AuthState.Loading -> {
                         CircularProgressIndicator()
+                    }
+
+                    is AuthState.EmailVerificationSent->{
+                        LaunchedEffect(authState.value) {
+                            Toast.makeText(context,"Verification email has been sent",Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
+                            navController.navigate("login_page")
+                        }
                     }
 
                     is AuthState.Authenticated -> {

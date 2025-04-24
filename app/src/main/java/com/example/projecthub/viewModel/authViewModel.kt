@@ -116,8 +116,7 @@ class authViewModel(application: Application): AndroidViewModel(application) {
                     user?.sendEmailVerification()
                         ?.addOnCompleteListener{verifyTask->
                             if(verifyTask.isSuccessful){
-                                _authState.value = AuthState.Error("Verification email sent! Please verify your email.")
-                                auth.signOut()
+                                _authState.postValue(AuthState.EmailVerificationSent)
                             }else{
                                 _authState.value = AuthState.Error("Failed to send email verification")
                             }
@@ -279,6 +278,7 @@ class authViewModel(application: Application): AndroidViewModel(application) {
 }
 
 sealed class AuthState{
+    object EmailVerificationSent : AuthState()
     object Authenticated : AuthState()
     object FirstTimeUser : AuthState()
     object ProfileSetupRequired : AuthState()
