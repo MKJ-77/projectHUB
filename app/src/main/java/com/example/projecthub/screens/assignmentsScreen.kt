@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ChangeCircle
 import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Edit
@@ -80,9 +81,12 @@ import com.google.firebase.firestore.firestore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.unit.DpOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -172,11 +176,17 @@ fun assignmentsScreen(
                         }
                     )
                 }
-                1 -> AvailableAssignmentsList(assignments = assignmentsState,navController = navController,
-                    onEditAssignment = { assignment ->
-                        assignmentToEdit = assignment
-                        showDialog = true
-                    })
+                1 -> {
+                    val activeAssignments = assignmentsState.filter { it.status == "active" }
+                    AvailableAssignmentsList(
+                        assignments = activeAssignments,
+                        navController = navController,
+                        onEditAssignment = { assignment ->
+                            assignmentToEdit = assignment
+                            showDialog = true
+                        }
+                    )
+                }
             }
 
         }
@@ -232,28 +242,67 @@ fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = 
 }
 
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEditAssignment: (Assignment) -> Unit = {}) {
+fun AssignmentCard(assignment: Assignment, navController: NavHostController, onEditAssignment: (Assignment) -> Unit = {}) {
     val context = LocalContext.current
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     val isCreatedByCurrentUser = assignment.createdBy == currentUserId
     var showBidDialog by remember { mutableStateOf(false) }
     var showBidsListDialog by remember { mutableStateOf(false) }
 
-    var posterName by remember {
-        mutableStateOf(UserProfileCache.getUserName(assignment.createdBy))
-    }
-    var posterPhotoId by remember {
-        mutableStateOf(UserProfileCache.getProfilePhotoId(assignment.createdBy))
-    }
-
-    var showStatusDialog by remember { mutableStateOf(false) }
+    var posterName by remember { mutableStateOf(UserProfileCache.getUserName(assignment.createdBy)) }
+    var posterPhotoId by remember { mutableStateOf(UserProfileCache.getProfilePhotoId(assignment.createdBy)) }
 
     var hasExistingBid by remember { mutableStateOf(false) }
     var existingBidData by remember { mutableStateOf<Bid?>(null) }
 
+    var expanded by remember { mutableStateOf(false) }
+    var selectedStatus by remember { mutableStateOf(assignment.status) }
+
+    var showStatusDialog by remember { mutableStateOf(false) }
+    if (showBidDialog) {
+        PlaceBidDialog(
+            assignmentId = assignment.id,
+            budget = assignment.budget,
+            existingBid = if (hasExistingBid) existingBidData else null,
+            onDismiss = { showBidDialog = false },
+            onBidPlaced = {
+                showBidDialog = false
+                Toast.makeText(
+                    context,
+                    if (hasExistingBid) "Bid updated successfully!" else "Bid placed successfully!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        )
+    }
+
+    if (showBidsListDialog) {
+        BidsListDialog(
+            assignmentId = assignment.id,
+            navController = navController,
+            onDismiss = { showBidsListDialog = false }
+        )
+    }
+
+    if (showStatusDialog){
+        UpdateStatusDialog(
+            currentStatus = assignment.status,
+            onDismiss = { showStatusDialog = false},
+            onStatusSelected = { newStatus->
+                Firebase.firestore.collection("assignments").document(assignment.id)
+                    .update("status",newStatus)
+                    .addOnSuccessListener {
+                        Toast.makeText(context,"status updated to new Status ${newStatus}",Toast.LENGTH_SHORT).show()
+                        showStatusDialog = false
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT).show()
+                        showStatusDialog = false
+                    }
+            }
+        )
+    }
 
     LaunchedEffect(assignment.createdBy) {
         if (posterName == "Unknown User") {
@@ -268,6 +317,7 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                 }
         }
     }
+
     LaunchedEffect(currentUserId, assignment.id) {
         currentUserId?.let { userId ->
             checkExistingBid(assignment.id, userId) { hasBid, existingBid ->
@@ -279,14 +329,13 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
+            containerColor = MaterialTheme.colorScheme.surface.copy(
+                alpha = 0.98f
+            )
         ),
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     ) {
         Column(
             modifier = Modifier
@@ -323,15 +372,52 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = MaterialTheme.shapes.small
+                // Dropdown for status
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = assignment.status,
+                        text = selectedStatus,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown",modifier = Modifier.clickable{expanded = true})
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    offset = DpOffset(x = 210.dp, y = 0.dp),
+                    onDismissRequest = { expanded = false }
+                ) {
+                    val statuses = listOf("Active", "In Progress", "Completed")
+                    statuses.forEach { status ->
+                        DropdownMenuItem(
+                            text = { Text(status) },
+                            onClick = {
+                                expanded = false
+                                if (status != selectedStatus) {
+                                    FirebaseFirestore.getInstance().collection("assignments")
+                                        .document(assignment.id)
+                                        .update("status", status)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Status updated to $status",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            selectedStatus = status
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to update status",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -404,16 +490,6 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("View Bids")
                         }
-
-                        OutlinedButton(
-                            onClick = {
-                                showStatusDialog = true
-                            },
-                        ) {    Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.ChangeCircle, contentDescription = "Change Status", modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Update Status")
-                        }}
                     }
 
                     OutlinedButton(
@@ -447,50 +523,51 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
             }
         }
     }
-    if (showBidDialog) {
-        PlaceBidDialog(
-            assignmentId = assignment.id,
-            budget = assignment.budget,
-            existingBid = if (hasExistingBid) existingBidData else null,
-            onDismiss = { showBidDialog = false },
-            onBidPlaced = {
-                showBidDialog = false
-                Toast.makeText(
-                    context,
-                    if (hasExistingBid) "Bid updated successfully!" else "Bid placed successfully!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        )
-    }
-
-    if (showBidsListDialog) {
-        BidsListDialog(
-            assignmentId = assignment.id,
-            navController = navController,
-            onDismiss = { showBidsListDialog = false }
-        )
-    }
-
-    if (showStatusDialog){
-        UpdateStatusDialog(
-            currentStatus = assignment.status,
-            onDismiss = { showStatusDialog = false},
-            onStatusSelected = { newStatus->
-                Firebase.firestore.collection("assignments").document(assignment.id)
-                    .update("status",newStatus)
-                    .addOnSuccessListener {
-                        Toast.makeText(context,"status updated to new Status ${newStatus}",Toast.LENGTH_SHORT).show()
-                        showStatusDialog = false
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT).show()
-                        showStatusDialog = false
-                    }
-            }
-        )
-    }
 }
+//    if (showBidDialog) {
+//        PlaceBidDialog(
+//            assignmentId = assignment.id,
+//            budget = assignment.budget,
+//            existingBid = if (hasExistingBid) existingBidData else null,
+//            onDismiss = { showBidDialog = false },
+//            onBidPlaced = {
+//                showBidDialog = false
+//                Toast.makeText(
+//                    context,
+//                    if (hasExistingBid) "Bid updated successfully!" else "Bid placed successfully!",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            }
+//        )
+//    }
+//
+//    if (showBidsListDialog) {
+//        BidsListDialog(
+//            assignmentId = assignment.id,
+//            navController = navController,
+//            onDismiss = { showBidsListDialog = false }
+//        )
+//    }
+//
+//    if (showStatusDialog){
+//        UpdateStatusDialog(
+//            currentStatus = assignment.status,
+//            onDismiss = { showStatusDialog = false},
+//            onStatusSelected = { newStatus->
+//                Firebase.firestore.collection("assignments").document(assignment.id)
+//                    .update("status",newStatus)
+//                    .addOnSuccessListener {
+//                        Toast.makeText(context,"status updated to new Status ${newStatus}",Toast.LENGTH_SHORT).show()
+//                        showStatusDialog = false
+//                    }
+//                    .addOnFailureListener {
+//                        Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT).show()
+//                        showStatusDialog = false
+//                    }
+//            }
+//        )
+//    }
+
 
 @Composable
 fun BidsListDialog(assignmentId: String,navController: NavHostController, onDismiss: () -> Unit) {
