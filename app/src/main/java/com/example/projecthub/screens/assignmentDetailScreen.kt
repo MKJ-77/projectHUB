@@ -64,6 +64,7 @@ import com.example.projecthub.data.Bid
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.formatTimestamp
+import com.example.projecthub.usecases.markAssignmentCompleted
 import com.example.projecthub.usecases.updateBidStatus
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.Timestamp
@@ -140,6 +141,19 @@ fun assignmentDetailScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Place Bid")
+                        }
+                    }
+
+                    if (currentUserId == assignmentData.createdBy && assignmentData.status != "completed") {
+                        Button(
+                            onClick = {
+                                markAssignmentCompleted(assignmentData.id ?: "")
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp)
+                        ) {
+                            Text("Mark as Completed")
                         }
                     }
                 }

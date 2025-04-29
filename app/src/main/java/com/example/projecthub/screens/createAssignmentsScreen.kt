@@ -396,7 +396,8 @@ fun CreateAssignmentDialog(
                                         "description" to description,
                                         "subject" to subject,
                                         "deadline" to deadline,
-                                        "budget" to (budget.toIntOrNull() ?: 0)
+                                        "budget" to (budget.toIntOrNull() ?: 0),
+                                        "status" to (existingAssignment?.status ?: "Active")
                                     )
 
                                     assignmentRef.update(updates)
@@ -420,7 +421,9 @@ fun CreateAssignmentDialog(
                                         "deadline" to deadline,
                                         "budget" to (budget.toIntOrNull() ?: 0),
                                         "createdBy" to userId,
-                                        "timestamp" to FieldValue.serverTimestamp()
+                                        "timestamp" to FieldValue.serverTimestamp(),
+                                        "status" to "Active"
+
                                     )
 
                                     assignmentRef.set(assignment)

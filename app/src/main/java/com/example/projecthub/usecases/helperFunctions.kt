@@ -498,3 +498,16 @@ fun chatWallpaperBackground(modifier: Modifier = Modifier) {
         }
     }
 }
+
+fun markAssignmentCompleted(assignmentId: String, onSuccess: () -> Unit = {}, onFailure: (Exception) -> Unit = {}) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("assignments")
+        .document(assignmentId)
+        .update("status", "completed")
+        .addOnSuccessListener {
+            onSuccess()
+        }
+        .addOnFailureListener {
+            onFailure(it)
+        }
+}

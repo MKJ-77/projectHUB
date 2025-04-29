@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.projecthub.screens
 
 import android.util.Log
@@ -21,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChangeCircle
 import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MonetizationOn
@@ -43,6 +46,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentCompositionErrors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +77,12 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.TextButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -221,28 +231,7 @@ fun AvailableAssignmentsList(assignments: List<Assignment>,isLoading: Boolean = 
     }
 }
 
-//@Composable
-//fun PostedAssignmentsList(assignments: List<Assignment>){
-//    if(assignments.isEmpty()){
-//        Box(
-//            modifier = Modifier.fillMaxSize(),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text("You haven't posted any assignments yet")
-//        }
-//    }else{
-//        LazyColumn (
-//            modifier = Modifier.fillMaxSize(),
-//            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-//            verticalArrangement = Arrangement.spacedBy(8.dp)
-//
-//        ){
-//            items(assignments){ assignment ->
-//                AssignmentCard(assignment)
-//            }
-//        }
-//    }
-//}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -259,6 +248,8 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
     var posterPhotoId by remember {
         mutableStateOf(UserProfileCache.getProfilePhotoId(assignment.createdBy))
     }
+
+    var showStatusDialog by remember { mutableStateOf(false) }
 
     var hasExistingBid by remember { mutableStateOf(false) }
     var existingBidData by remember { mutableStateOf<Bid?>(null) }
@@ -337,7 +328,7 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = "Active",
+                        text = assignment.status,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -413,6 +404,16 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("View Bids")
                         }
+
+                        OutlinedButton(
+                            onClick = {
+                                showStatusDialog = true
+                            },
+                        ) {    Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.ChangeCircle, contentDescription = "Change Status", modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Update Status")
+                        }}
                     }
 
                     OutlinedButton(
@@ -468,6 +469,25 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController,onEd
             assignmentId = assignment.id,
             navController = navController,
             onDismiss = { showBidsListDialog = false }
+        )
+    }
+
+    if (showStatusDialog){
+        UpdateStatusDialog(
+            currentStatus = assignment.status,
+            onDismiss = { showStatusDialog = false},
+            onStatusSelected = { newStatus->
+                Firebase.firestore.collection("assignments").document(assignment.id)
+                    .update("status",newStatus)
+                    .addOnSuccessListener {
+                        Toast.makeText(context,"status updated to new Status ${newStatus}",Toast.LENGTH_SHORT).show()
+                        showStatusDialog = false
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT).show()
+                        showStatusDialog = false
+                    }
+            }
         )
     }
 }
@@ -689,4 +709,51 @@ fun InfoChip(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String
             )
         }
     }
+}
+
+
+@Composable
+fun UpdateStatusDialog(
+    currentStatus: String,
+    onDismiss: () -> Unit,
+    onStatusSelected: (String) -> Unit
+) {
+    val statuses = listOf("Active", "In Progress", "Completed")
+    var selectedStatus by remember { mutableStateOf(currentStatus) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = { onStatusSelected(selectedStatus) }) {
+                Text("Update")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = {
+            Text("Update Assignment Status")
+        },
+        text = {
+            Column {
+                statuses.forEach { status ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedStatus = status }
+                            .padding(8.dp)
+                    ) {
+                        RadioButton(
+                            selected = selectedStatus == status,
+                            onClick = { selectedStatus = status }
+                        )
+                        Text(text = status)
+                    }
+                }
+            }
+        }
+    )
 }
