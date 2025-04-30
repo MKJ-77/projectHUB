@@ -1,5 +1,6 @@
     package com.example.projecthub.screens
 
+import AppBackground7
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -163,10 +164,10 @@ fun homePage(
                 },
                 actions = {
                     IconButton(onClick = { /*Notifications  */ }) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Notifications")
+                        Icon(Icons.Default.Notifications, contentDescription = "Notifications",tint = MaterialTheme.colorScheme.secondary)
                     }
                     IconButton(onClick = {navController.navigate(routes.settingsScreen.route)}) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.secondary)
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -203,7 +204,7 @@ fun homePage(
                 .fillMaxSize()
                 .padding(paddingValues)
         ){
-            bubbleBackground()
+            AppBackground7()
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),

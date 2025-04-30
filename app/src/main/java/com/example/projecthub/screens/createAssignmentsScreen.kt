@@ -191,12 +191,23 @@ fun CreateAssignmentDialog(
             .padding(vertical = 8.dp),
         shape = RoundedCornerShape(24.dp),
 
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
         tonalElevation = 8.dp,
         title = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        ),
+                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    )
+                    .padding(vertical = 16.dp)
             ) {
                 Text(
                     text = "Assignment Details",
@@ -224,14 +235,14 @@ fun CreateAssignmentDialog(
                     OutlinedTextField(
                         value = title,
                         onValueChange = { title = it },
-                        label = { Text("Title*") },
+                        placeholder = { Text("Title*") },
                         leadingIcon = { Icon(Icons.Default.Title, "Title") },
                         modifier = Modifier
                             .fillMaxWidth()
                             ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                             focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface
@@ -251,14 +262,14 @@ fun CreateAssignmentDialog(
                     OutlinedTextField(
                         value = subject,
                         onValueChange = { subject = it },
-                        label = { Text("Subject*") },
+                        placeholder = {Text("Subject")},
                         leadingIcon = { Icon(Icons.Default.Book, "Subject") },
                         modifier = Modifier
                             .fillMaxWidth()
                             ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                             focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface
@@ -278,7 +289,7 @@ fun CreateAssignmentDialog(
                     OutlinedTextField(
                         value = description,
                         onValueChange = { description = it },
-                        label = { Text("Description*") },
+                        placeholder = { Text("Description*") },
                         leadingIcon = { Icon(Icons.Default.Description, "Description") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -286,7 +297,7 @@ fun CreateAssignmentDialog(
                             .height(100.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                             focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface
@@ -306,7 +317,7 @@ fun CreateAssignmentDialog(
                     OutlinedTextField(
                         value = deadline,
                         onValueChange = { },
-                        label = { Text("Deadline*") },
+                        placeholder = { Text("Deadline*") },
                         leadingIcon = { Icon(Icons.Default.DateRange, "Deadline") },
                         trailingIcon = {
                             IconButton(onClick = { showDatePicker.value = true }) {
@@ -319,7 +330,7 @@ fun CreateAssignmentDialog(
                             ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                             focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface
@@ -344,7 +355,7 @@ fun CreateAssignmentDialog(
                                 budget = it
                             }
                         },
-                        label = { Text("Budget (in ₹)*") },
+                        placeholder = { Text("Budget (in ₹)*") },
                         leadingIcon = { Icon(Icons.Default.CurrencyRupee, "Budget") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier
@@ -352,7 +363,7 @@ fun CreateAssignmentDialog(
                             ,
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                             focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface

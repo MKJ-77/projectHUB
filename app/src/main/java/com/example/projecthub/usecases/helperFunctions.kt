@@ -1,7 +1,6 @@
 package com.example.projecthub.usecases
 
 import android.content.Context
-import android.graphics.Color
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
@@ -45,13 +44,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.style.TextAlign
 import com.example.projecthub.data.Assignment
 import com.example.projecthub.data.Bid
 import com.example.projecthub.data.chatChannel
 import com.example.projecthub.data.message
-import com.example.projecthub.ui.theme.PaperWhite
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -61,7 +62,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.io.path.Path
+import kotlin.io.path.moveTo
 import kotlin.random.Random
+import androidx.compose.ui.graphics.Path
 
 @Composable
 fun bottomNavigationBar(navController: NavHostController, currentRoute: String) {
@@ -70,7 +74,7 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
         tonalElevation = 8.dp
     ) {
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+            icon = { Icon(Icons.Default.Home, contentDescription = "Home",tint = MaterialTheme.colorScheme.secondary) },
             label = { Text("Home") },
             selected = currentRoute == "home_page",
             onClick = {
@@ -84,7 +88,7 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
         )
 
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Assignment, contentDescription = "Assignments") },
+            icon = { Icon(Icons.Default.Assignment, contentDescription = "Assignments",tint = MaterialTheme.colorScheme.secondary) },
             label = { Text("Assignments") },
             selected = currentRoute == "assignments",
             onClick = {
@@ -99,7 +103,7 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
         )
 
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Email, contentDescription = "Messages") },
+            icon = { Icon(Icons.Default.Email, contentDescription = "Messages",tint = MaterialTheme.colorScheme.secondary) },
             label = { Text("Messages") },
             selected = currentRoute == "messages_list",
             onClick = {
@@ -113,7 +117,7 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
         )
 
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+            icon = { Icon(Icons.Default.Person, contentDescription = "Profile",tint = MaterialTheme.colorScheme.secondary) },
             label = { Text("Profile") },
             selected = currentRoute == "profile",
             onClick = {
@@ -147,13 +151,15 @@ fun MainAppBar(title: String, navController: NavHostController) {
             IconButton(onClick = { /* Notifications */ }) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications"
+                    contentDescription = "Notifications",
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
             IconButton(onClick = { navController.navigate(routes.settingsScreen.route) }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings"
+                    contentDescription = "Settings",
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -394,28 +400,7 @@ fun sendMessage(
         }
 }
 
-//fun fetchMessage(
-//    chatChannelId: String,
-//    onMesageFetched :(List<message>) -> Unit
-//){
-//    val db = FirebaseFirestore.getInstance()
-//    val messageRef = db.collection("chatChannels")
-//        .document(chatChannelId)
-//        .collection("messages")
-//    messageRef.orderBy("timestamp") // Fixed field name casing
-//        .get()
-//        .addOnSuccessListener { result->
-//            val messages = mutableListOf<message>()
-//            for (document in result){
-//                val message = document.toObject(message::class.java)
-//                messages.add(message)
-//            }
-//            onMesageFetched(messages)
-//        }
-//        .addOnFailureListener { e ->
-//            Log.e("FetchMessages", "Error fetching messages: ${e.message}")
-//        }
-//}
+
 
 fun listenForMessages(
     chatChannelId: String,
@@ -465,39 +450,6 @@ fun checkExistingBid(
 }
 
 
-@Composable
-fun chatWallpaperBackground(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize()) {
-        val random = java.util.Random()
-        val numberOfParticles = 150
-        repeat(numberOfParticles) { index ->
-            val size = (12 + random.nextInt(16)).dp
-            val xOffset = random.nextInt(800) - 200
-            val yOffset = random.nextInt(1200) - 200
-
-            Box(
-                modifier = Modifier
-                    .size(size)
-                    .offset(
-                        x = xOffset.dp,
-                        y = yOffset.dp
-                    )
-                    .clip(CircleShape)
-                    .background(
-                        when (index % 5) {
-                            0 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            1 -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-                            2 -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.17f)
-                            3 -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.12f)
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.10f)
-                        }
-                    )
-
-
-            )
-        }
-    }
-}
 
 fun markAssignmentCompleted(assignmentId: String, onSuccess: () -> Unit = {}, onFailure: (Exception) -> Unit = {}) {
     val db = FirebaseFirestore.getInstance()

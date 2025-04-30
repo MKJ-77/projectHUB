@@ -5,6 +5,7 @@ package com.example.projecthub.screens
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -177,7 +178,7 @@ fun assignmentsScreen(
                     )
                 }
                 1 -> {
-                    val activeAssignments = assignmentsState.filter { it.status == "active" }
+                    val activeAssignments = assignmentsState.filter { it.status == "Active" }
                     AvailableAssignmentsList(
                         assignments = activeAssignments,
                         navController = navController,
@@ -285,19 +286,24 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
         )
     }
 
-    if (showStatusDialog){
+    if (showStatusDialog) {
         UpdateStatusDialog(
             currentStatus = assignment.status,
-            onDismiss = { showStatusDialog = false},
-            onStatusSelected = { newStatus->
+            onDismiss = { showStatusDialog = false },
+            onStatusSelected = { newStatus ->
                 Firebase.firestore.collection("assignments").document(assignment.id)
-                    .update("status",newStatus)
+                    .update("status", newStatus)
                     .addOnSuccessListener {
-                        Toast.makeText(context,"status updated to new Status ${newStatus}",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "status updated to new Status ${newStatus}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         showStatusDialog = false
                     }
                     .addOnFailureListener {
-                        Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT)
+                            .show()
                         showStatusDialog = false
                     }
             }
@@ -327,7 +333,14 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
         }
     }
 
-    Card(
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .padding(1.dp)
+            .background(MaterialTheme.colorScheme.secondary)
+    ){
+        Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(
@@ -381,49 +394,58 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown",modifier = Modifier.clickable{expanded = true})
+                    if(assignment.createdBy == currentUserId) {
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            contentDescription = "Dropdown",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.clickable { expanded = true }
+                        )
+                    }
                 }
 
-                DropdownMenu(
-                    expanded = expanded,
-                    offset = DpOffset(x = 210.dp, y = 0.dp),
-                    onDismissRequest = { expanded = false }
-                ) {
-                    val statuses = listOf("Active", "In Progress", "Completed")
-                    statuses.forEach { status ->
-                        DropdownMenuItem(
-                            text = { Text(status) },
-                            onClick = {
-                                expanded = false
-                                if (status != selectedStatus) {
-                                    FirebaseFirestore.getInstance().collection("assignments")
-                                        .document(assignment.id)
-                                        .update("status", status)
-                                        .addOnSuccessListener {
-                                            Toast.makeText(
-                                                context,
-                                                "Status updated to $status",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            selectedStatus = status
-                                        }
-                                        .addOnFailureListener {
-                                            Toast.makeText(
-                                                context,
-                                                "Failed to update status",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                if (assignment.createdBy == currentUserId) {
+                    DropdownMenu(
+                        expanded = expanded,
+                        offset = DpOffset(x = 210.dp, y = 0.dp),
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        val statuses = listOf("Active", "In Progress", "Completed")
+                        statuses.forEach { status ->
+                            DropdownMenuItem(
+                                text = { Text(status) },
+                                onClick = {
+                                    expanded = false
+                                    if (status != selectedStatus) {
+                                        FirebaseFirestore.getInstance().collection("assignments")
+                                            .document(assignment.id)
+                                            .update("status", status)
+                                            .addOnSuccessListener {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Status updated to $status",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                selectedStatus = status
+                                            }
+                                            .addOnFailureListener {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Failed to update status",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
 
             Divider(
                 modifier = Modifier.padding(vertical = 4.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                color = MaterialTheme.colorScheme.secondary
             )
 
             // Assignment details
@@ -523,6 +545,7 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
             }
         }
     }
+}
 }
 //    if (showBidDialog) {
 //        PlaceBidDialog(

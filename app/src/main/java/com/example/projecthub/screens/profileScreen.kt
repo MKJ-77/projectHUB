@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -135,8 +136,7 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            bubbleBackground(modifier = Modifier.fillMaxSize())
-
+AppBackground7()
             Column(
                 modifier = Modifier
                     .fillMaxSize()

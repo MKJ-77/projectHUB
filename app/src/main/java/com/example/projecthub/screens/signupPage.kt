@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -66,48 +67,9 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
             )
             .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .align(Alignment.TopEnd)
-                .offset(x = 50.dp, y = (-30).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-        )
 
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.BottomStart)
-                .offset(x = (-30).dp, y = 30.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
-        )
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .align(Alignment.BottomEnd)
-                .offset(x = 30.dp, y = 30.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
-        )
 
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .align(Alignment.CenterStart)
-                .offset(x = (-70).dp, y = (-100).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
-        )
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .align(Alignment.CenterEnd)
-                .offset(x = (70).dp, y = (40).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f))
-        )
+        AppBackground7()
 
         Card(
             modifier = Modifier
@@ -181,7 +143,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        placeholder = { Text("Email") },
                         leadingIcon = {
                             Icon(Icons.Filled.Email, contentDescription = "Email")
                         },
@@ -212,7 +174,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password") },
+                        placeholder = { Text("Password") },
                         leadingIcon = {
                             Icon(Icons.Filled.Lock, contentDescription = "Password")
                         },
@@ -252,7 +214,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm Password") },
+                        placeholder = { Text("Confirm Password") },
                         leadingIcon = {
                             Icon(Icons.Filled.Lock, contentDescription = "Confirm Password")
                         },

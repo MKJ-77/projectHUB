@@ -1,5 +1,8 @@
 package com.example.projecthub
 
+
+import AppBackground7
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

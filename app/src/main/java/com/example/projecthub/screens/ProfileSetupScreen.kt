@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
@@ -83,32 +84,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
             )
             .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .align(Alignment.TopEnd)
-                .offset(x = 50.dp, y = (-30).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .align(Alignment.CenterStart)
-                .offset(x = (-70).dp, y = (-100).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.BottomStart)
-                .offset(x = (-30).dp, y = 30.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
-        )
+        AppBackground7()
 
         Card(
             modifier = Modifier

@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -81,42 +82,10 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
             .background(
                 brush = Brush.verticalGradient(colors = gradientColors)
             )
-            .padding(16.dp)
+//            .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .align(Alignment.TopEnd)
-                .offset(x = 50.dp, y = (-30).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-        )
+        AppBackground7()
 
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.BottomStart)
-                .offset(x = (-30).dp, y = 30.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .align(Alignment.CenterStart)
-                .offset(x = (-70).dp, y = (-100).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
-        )
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .align(Alignment.CenterEnd)
-                .offset(x = (70).dp, y = (40).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.41f))
-        )
 
         Card(
             modifier = Modifier
@@ -188,7 +157,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        placeholder = { Text("Email") },
                         leadingIcon = {
                             Icon(Icons.Default.Email, contentDescription = "Email")
                         },
@@ -218,7 +187,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password") },
+                        placeholder = { Text("Password") },
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = "Password")
                         },
