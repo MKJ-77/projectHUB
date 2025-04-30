@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import ChatWallpaperBackground
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.projecthub.data.message
-import com.example.projecthub.usecases.chatWallpaperBackground
 import com.example.projecthub.usecases.formatTimeStamp
 import com.example.projecthub.usecases.sendMessage
 import com.google.firebase.auth.FirebaseAuth
@@ -194,7 +194,9 @@ fun ChatScreen(
                 contentAlignment = Alignment.Center
             ) {
 
-                chatWallpaperBackground(modifier = Modifier.fillMaxSize())
+//                chatWallpaperBackground(modifier = Modifier.fillMaxSize())
+                ChatWallpaperBackground()
+
                 CircularProgressIndicator()
             }
         } else {
@@ -210,8 +212,7 @@ fun ChatScreen(
                         .background(MaterialTheme.colorScheme.surface)
                 ) {
 
-                    chatWallpaperBackground(modifier = Modifier.fillMaxSize())
-
+ChatWallpaperBackground()
                     if (messages.isEmpty()) {
                         Column(
                             modifier = Modifier
@@ -313,7 +314,7 @@ fun MessageBubble(message: message) {
     val bubbleColor = if (isCurrentUser)
         MaterialTheme.colorScheme.primary
     else
-        MaterialTheme.colorScheme.secondaryContainer
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
 
 
     val textColor = if (isCurrentUser)

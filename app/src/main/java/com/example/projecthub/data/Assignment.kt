@@ -11,5 +11,5 @@ data class Assignment(
     val budget : Int = 0,
     val createdBy : String = "",
     val timestamp : Timestamp = Timestamp.now(),
-    val status : String = "active",
+    val status : String = "Active",
 )

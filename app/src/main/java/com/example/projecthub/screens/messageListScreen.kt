@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -111,8 +112,7 @@ fun MessageListScreen(
         bottomBar = { bottomNavigationBar(navController = navController, currentRoute = "messages_list") }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            bubbleBackground(modifier = Modifier.fillMaxSize())
-
+AppBackground7()
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (chats.isEmpty()) {
