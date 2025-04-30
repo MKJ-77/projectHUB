@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -33,7 +34,7 @@ import com.example.projecthub.usecases.bubbleBackground
 import com.example.projecthub.viewModel.AuthState
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
-
+import com.example.projecthub.viewModel.ThemeViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangePasswordScreen(
@@ -47,6 +48,7 @@ fun ChangePasswordScreen(
     var newPasswordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     val currentUserEmail = remember { FirebaseAuth.getInstance().currentUser?.email ?: "" }
+    val themeViewModel: ThemeViewModel = viewModel()
 
 
     val authState by authViewModel.authState.observeAsState()
@@ -91,7 +93,7 @@ fun ChangePasswordScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            bubbleBackground()
+            AppBackground7(themeViewModel = themeViewModel)
 
             Card(
                 modifier = Modifier

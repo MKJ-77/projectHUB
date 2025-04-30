@@ -90,7 +90,7 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
         NavigationBarItem(
             icon = { Icon(Icons.Default.Assignment, contentDescription = "Assignments",tint = MaterialTheme.colorScheme.secondary) },
             label = { Text("Assignments") },
-            selected = currentRoute == "assignments",
+            selected = currentRoute == "assignments_page",
             onClick = {
                 if (currentRoute != "assignments") {
                     navController.navigate(routes.assignmentsScreen.route) {

@@ -88,6 +88,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.unit.DpOffset
+import com.example.projecthub.viewModel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +97,7 @@ fun assignmentsScreen(
     authViewModel: authViewModel = viewModel(),
 ) {
     var isLoading by remember { mutableStateOf(true) }
+    val themeViewModel: ThemeViewModel = viewModel()
 
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("My Assignments", "All Assignments")
@@ -149,7 +151,9 @@ fun assignmentsScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             TabRow(
-                selectedTabIndex = selectedTab
+                selectedTabIndex = selectedTab,
+                containerColor = MaterialTheme.colorScheme.background // Match the screen's background color
+
             ) {
                 tabs.forEachIndexed{ index, title ->
                     Tab(

@@ -57,6 +57,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.data.Assignment
@@ -66,6 +67,7 @@ import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.formatTimestamp
 import com.example.projecthub.usecases.markAssignmentCompleted
 import com.example.projecthub.usecases.updateBidStatus
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -85,6 +87,7 @@ fun assignmentDetailScreen(
     var isLoading by remember { mutableStateOf(true) }
     var showBidDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val themeViewModel: ThemeViewModel = viewModel()
 
     LaunchedEffect(assignmentId) {
         isLoading = true

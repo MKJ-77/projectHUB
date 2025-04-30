@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,12 +23,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.data.UserProfile
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -36,6 +39,7 @@ fun userProfileScreen(navController: NavHostController, userId: String) {
     val context = LocalContext.current
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    val themeViewModel: ThemeViewModel = viewModel()
 
     LaunchedEffect(userId) {
         isLoading = true
@@ -82,7 +86,7 @@ fun userProfileScreen(navController: NavHostController, userId: String) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            bubbleBackground()
+            AppBackground7(themeViewModel = themeViewModel)
 
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

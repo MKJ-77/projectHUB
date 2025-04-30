@@ -35,6 +35,7 @@ import com.example.projecthub.usecases.bubbleBackground
 import com.example.projecthub.usecases.getCurrentDate
 import com.example.projecthub.usecases.getGreeting
 import com.example.projecthub.viewModel.AuthState
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -55,6 +56,7 @@ fun homePage(
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isLoading by remember { mutableStateOf(true) }
+    val themeViewModel: ThemeViewModel = viewModel()
 
     //Implement Stats
     var postedAssignments by remember { mutableStateOf(0) }
@@ -204,7 +206,7 @@ fun homePage(
                 .fillMaxSize()
                 .padding(paddingValues)
         ){
-            AppBackground7()
+            AppBackground7(themeViewModel = themeViewModel)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -356,7 +358,7 @@ private fun MyAssignmentsSection(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = Color.Transparent
             )
         ) {
             when {
@@ -381,7 +383,7 @@ private fun MyAssignmentsSection(
                     }
                 }
                 else -> {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(contentPadding = PaddingValues(16.dp),horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         items(assignments) { assignment ->
                             Assignment_Card(assignment = assignment)
                         }
@@ -449,7 +451,7 @@ private fun AvailableAssignmentsSection(
                     }
                 }
                 else -> {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(contentPadding = PaddingValues(16.dp),horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         items(assignments) { assignment ->
                             Assignment_Card(assignment = assignment)
                         }
@@ -464,7 +466,7 @@ private fun AvailableAssignmentsSection(
 @Composable
 private fun Assignment_Card(assignment: Assignment) {
     Card(
-        modifier = Modifier.width(280.dp),
+        modifier = Modifier.width(280.dp).padding(horizontal = 3.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
         ),

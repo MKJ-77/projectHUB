@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.data.chatChannel
@@ -26,6 +27,7 @@ import com.example.projecthub.usecases.NoChannelsMessage
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
 import com.example.projecthub.usecases.formatTimeStamp
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -40,6 +42,7 @@ fun MessageListScreen(
     var chats by remember { mutableStateOf<List<ChatWithUserDetails>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val themeViewModel: ThemeViewModel = viewModel()
 
     LaunchedEffect(key1 = true) {
         val db = FirebaseFirestore.getInstance()
@@ -112,7 +115,7 @@ fun MessageListScreen(
         bottomBar = { bottomNavigationBar(navController = navController, currentRoute = "messages_list") }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-AppBackground7()
+            AppBackground7(themeViewModel = themeViewModel)
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (chats.isEmpty()) {

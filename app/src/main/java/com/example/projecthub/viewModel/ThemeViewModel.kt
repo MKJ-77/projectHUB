@@ -76,7 +76,6 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
             ThemeManager.saveThemeMode(getApplication(), themeMode)
             _themeMode.emit(themeMode)
 
-            // Update dark mode based on new theme setting
             when (themeMode) {
                 ThemeManager.THEME_LIGHT -> _isDarkMode.emit(false)
                 ThemeManager.THEME_DARK -> _isDarkMode.emit(true)

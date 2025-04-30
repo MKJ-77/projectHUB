@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.projecthub.R
@@ -34,6 +35,7 @@ import com.example.projecthub.usecases.CreateAssignmentFAB
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -97,6 +99,7 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    val themeViewModel: ThemeViewModel = viewModel()
 
 
     Scaffold(
@@ -136,7 +139,7 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-AppBackground7()
+            AppBackground7(themeViewModel = themeViewModel)
             Column(
                 modifier = Modifier
                     .fillMaxSize()

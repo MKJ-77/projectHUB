@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -38,6 +39,7 @@ import com.example.projecthub.usecases.bubbleBackground
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.projecthub.viewModel.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +63,7 @@ fun EditProfileScreen(
     var showPhotoDialog by remember { mutableStateOf(false) }
     val skills = remember { mutableStateListOf<String>() }
     var skill by remember { mutableStateOf("") }
+    val themeViewModel: ThemeViewModel = viewModel()
 
     val maxBioWords = 50
     val maxSkills = 10
@@ -123,7 +126,7 @@ fun EditProfileScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            bubbleBackground()
+            AppBackground7(themeViewModel = themeViewModel)
 
             if (isLoading) {
                 CircularProgressIndicator(

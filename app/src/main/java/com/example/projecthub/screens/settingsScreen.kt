@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,8 +54,9 @@ fun settingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
-        ){
-            bubbleBackground()
+        )
+        {
+            AppBackground7(themeViewModel)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -90,9 +92,9 @@ fun settingsScreen(
                             onClick = { /* Theme dialog will be handled separately */ },
                             trailingContent = {
                                 ThemeSelector(
-                                    selectedTheme = selectedTheme,
-                                    onThemeSelected = { theme ->
-                                        themeViewModel.setThemeMode(theme)
+                                    selectedTheme = themeMode,
+                                    onThemeSelected = { selectedTheme ->
+                                        themeViewModel.setThemeMode(selectedTheme)
 
                                     }
                                 )
@@ -315,7 +317,6 @@ fun ThemeSelector(
     onThemeSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    // Add "Default" to the themes list
     val themes = listOf("Light", "Dark", "Default")
 
     Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
