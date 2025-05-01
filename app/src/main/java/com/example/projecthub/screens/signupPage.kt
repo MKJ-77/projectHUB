@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.navigation.routes
 import com.example.projecthub.viewModel.AuthState
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 
 @Composable
@@ -43,6 +44,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    val themeViewModel: ThemeViewModel = viewModel()
 
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
@@ -69,7 +71,7 @@ fun signupPage(modifier: Modifier = Modifier, navController: NavHostController, 
     ) {
 
 
-        AppBackground7()
+        AppBackground7(themeViewModel = themeViewModel)
 
         Card(
             modifier = Modifier

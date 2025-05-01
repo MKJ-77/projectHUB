@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.viewModel.AuthState
 import com.example.projecthub.viewModel.authViewModel
+import com.example.projecthub.viewModel.ThemeViewModel
 
 @Composable
 fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: authViewModel = viewModel()) {
@@ -41,6 +42,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
+    val themeViewModel: ThemeViewModel = viewModel()
 
 
     val authState = authViewModel.authState.observeAsState()
@@ -84,7 +86,7 @@ fun loginPage(modifier: Modifier = Modifier, navController: NavHostController, a
             )
 //            .padding(16.dp)
     ) {
-        AppBackground7()
+        AppBackground7(themeViewModel = themeViewModel)
 
 
         Card(

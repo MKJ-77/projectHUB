@@ -1,16 +1,34 @@
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import com.example.projecthub.viewModel.ThemeViewModel
 
 import kotlin.random.Random
+
+
+
 @Composable
-fun AppBackground7() {
+fun AppBackground7(themeViewModel: ThemeViewModel){
+    val isDarkTheme by themeViewModel.isDarkMode.collectAsState()
+
+    if (isDarkTheme) {
+        AppBackgroundDark()
+    } else {
+        AppBackgroundLight()
+    }
+}
+
+@Composable
+fun AppBackgroundDark() {
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val darkBlackGradient = Brush.linearGradient(
@@ -142,6 +160,139 @@ fun AppBackground7() {
 
 
 
+@Composable
+fun AppBackgroundLight() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val darkGrayGradient = Brush.linearGradient(
+                colorStops = arrayOf(
+                    0.0f to Color(0xFFE5E5E5),  // Darker light gray at left
+                    0.3f to Color(0xFFDEDEDE),  // Medium gray
+                    0.6f to Color(0xFFD8D8D8),  // Slightly darker
+                    0.8f to Color(0xFFD0D0D0),  // Medium-dark gray
+                    1.0f to Color(0xFFC8C8C8)   // Darker gray at right
+                ),
+                start = Offset(0f, size.height * 0.5f),
+                end = Offset(size.width, size.height * 0.5f)
+            )
+
+            drawRect(brush = darkGrayGradient)
+
+            val fadeYellowDiagonalPath = Path().apply {
+                moveTo(size.width * -0.2f, size.height * -0.1f)
+                lineTo(size.width * 0.3f, size.height * -0.2f)
+                lineTo(size.width * 1.2f, size.height * 0.7f)
+                lineTo(size.width * 0.7f, size.height * 0.8f)
+                close()
+            }
+
+            val fadeYellowGradient = Brush.linearGradient(
+                colorStops = arrayOf(
+                    0.0f to Color(0xFFEDE1B8).copy(alpha = 0.5f),    // Slightly deeper pale yellow
+                    0.2f to Color(0xFFE8D699).copy(alpha = 0.45f),   // Deeper cream
+                    0.4f to Color(0xFFE2CA7B).copy(alpha = 0.4f),    // Deeper faded yellow
+                    0.5f to Color(0xFFEDE1B8).copy(alpha = 0.35f),   // Medium cream
+                    0.7f to Color(0xFFD7C285).copy(alpha = 0.3f),    // Deeper muted gold
+                    0.85f to Color(0xFFD0BB74).copy(alpha = 0.25f),  // Darker faded gold
+                    1.0f to Color(0xFFC9B463).copy(alpha = 0.2f)     // Dull gold
+                ),
+                start = Offset(0f, 0f),
+                end = Offset(size.width, size.height)
+            )
+
+            drawPath(
+                path = fadeYellowDiagonalPath,
+                brush = fadeYellowGradient
+            )
+
+            val lightDiagonalPath = Path().apply {
+                moveTo(size.width * 0.7f, size.height * -0.2f)
+                lineTo(size.width * 1.3f, size.height * -0.2f)
+                lineTo(size.width * 1.3f, size.height * 1.3f)
+                lineTo(size.width * 0.3f, size.height * 1.3f)
+                close()
+            }
+
+            val darkOverlayGradient = Brush.linearGradient(
+                colorStops = arrayOf(
+                    0.0f to Color(0xFFD0D0D0).copy(alpha = 0.3f),
+                    0.4f to Color(0xFFC0C0C0).copy(alpha = 0.4f),
+                    0.7f to Color(0xFFB8B8B8).copy(alpha = 0.5f),
+                    1.0f to Color(0xFFB0B0B0).copy(alpha = 0.6f)
+                ),
+                start = Offset(size.width * 0.7f, 0f),
+                end = Offset(size.width, size.height)
+            )
+
+            drawPath(
+                path = lightDiagonalPath,
+                brush = darkOverlayGradient
+            )
+
+            val bottomLeftPath = Path().apply {
+                moveTo(0f, size.height * 0.6f)
+                lineTo(size.width * 0.4f, size.height)
+                lineTo(0f, size.height)
+                close()
+            }
+
+            val creamBottomGradient = Brush.linearGradient(
+                colorStops = arrayOf(
+                    0.0f to Color(0xFFE2CA7B).copy(alpha = 0.5f),    // Deeper faded yellow
+                    0.5f to Color(0xFFEDE1B8).copy(alpha = 0.4f),    // Medium cream
+                    1.0f to Color(0xFFD7C285).copy(alpha = 0.3f)     // Deeper muted beige
+                ),
+                start = Offset(0f, size.height * 0.8f),
+                end = Offset(size.width * 0.2f, size.height)
+            )
+
+            drawPath(
+                path = bottomLeftPath,
+                brush = creamBottomGradient
+            )
+
+            drawLine(
+                color = Color(0xFFE2CA7B).copy(alpha = 0.5f),
+                start = Offset(size.width * 0.5f, 0f),
+                end = Offset(size.width, 0f),
+                strokeWidth = size.width * 0.004f
+            )
+
+            val topRightPath = Path().apply {
+                moveTo(size.width * 0.85f, 0f)
+                lineTo(size.width, 0f)
+                lineTo(size.width, size.height * 0.15f)
+                close()
+            }
+
+            drawPath(
+                path = topRightPath,
+                brush = Brush.linearGradient(
+                    colorStops = arrayOf(
+                        0.0f to Color(0xFFE2CA7B).copy(alpha = 0.4f),
+                        1.0f to Color(0xFFEDE1B8).copy(alpha = 0.3f)
+                    ),
+                    start = Offset(size.width, 0f),
+                    end = Offset(size.width * 0.9f, size.height * 0.1f)
+                )
+            )
+
+
+
+            val dotCount = 15
+            for (i in 0 until dotCount) {
+                val x = size.width * (0.1f + (i * 0.06f))
+                val y = size.height * 0.1f
+
+                drawCircle(
+                    color = Color(0xFFE2CA7B).copy(alpha = 0.4f),
+                    radius = size.width * 0.002f,
+                    center = Offset(x, y)
+                )
+            }
+        }
+    }
+}
 @Composable
 fun ChatWallpaperBackground() {
     val goldColor = Color(0xFF6E572C)  // Rich gold color

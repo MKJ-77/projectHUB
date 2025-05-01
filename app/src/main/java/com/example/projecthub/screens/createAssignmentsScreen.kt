@@ -1,5 +1,6 @@
     package com.example.projecthub.screens
 
+import AppBackground7
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -22,12 +23,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.projecthub.data.Assignment
 import com.example.projecthub.usecases.MainAppBar
 import com.example.projecthub.usecases.bottomNavigationBar
 import com.example.projecthub.usecases.bubbleBackground
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -41,8 +44,10 @@ import java.util.*
 fun createAssignmentScreen(
     navController: NavController,
     authViewModel: authViewModel,
+
     assignmentId: String? = null) {
 
+    val themeViewModel: ThemeViewModel = viewModel()
 
     val isEditMode = assignmentId != null
     var assignment by remember { mutableStateOf<Assignment?>(null) }
@@ -90,7 +95,7 @@ fun createAssignmentScreen(
                 .background(brush = Brush.verticalGradient(colors = gradientColors))
                 .padding(paddingValues)
         ) {
-            bubbleBackground()
+            AppBackground7(themeViewModel = themeViewModel)
 
 
             if (isLoading) {

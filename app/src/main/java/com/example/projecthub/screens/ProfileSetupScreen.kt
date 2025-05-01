@@ -41,6 +41,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
+import com.example.projecthub.viewModel.ThemeViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewModel = viewModel()) {
@@ -54,6 +55,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
 
     val skills = remember { mutableStateListOf<String>() }
     var profilePhoto by remember { mutableStateOf<Uri?>(null) }
+    val themeViewModel: ThemeViewModel = viewModel()
 
     var selectedPhotoId by remember { mutableStateOf(R.drawable.profilephoto1) }
     var showPhotoDialog by remember { mutableStateOf(false) }
@@ -84,7 +86,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
             )
             .padding(16.dp)
     ) {
-        AppBackground7()
+        AppBackground7(themeViewModel = themeViewModel)
 
         Card(
             modifier = Modifier

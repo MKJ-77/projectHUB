@@ -102,30 +102,52 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = RichGold,
+    primary = Color(0xFF9C7C38),          // Softer gold
     onPrimary = Color.White,
-    primaryContainer = MediumGold.copy(alpha = 0.15f),
-    onPrimaryContainer = DarkGold,
-    secondary = StandardGold,
-    onSecondary = Color.Black,
-    secondaryContainer = LightGold.copy(alpha = 0.2f),
-    onSecondaryContainer = DarkGold,
-    tertiary = AccentGold,
-    onTertiary = Color.Black,
-    tertiaryContainer = LightGold.copy(alpha = 0.1f),
-    onTertiaryContainer = DarkGold,
-    background = OffWhite,
-    onBackground = DarkBlack,
-    surface = LightGray,
-    onSurface = DarkBlack,
-    surfaceVariant = Color(0xFFE0E0E0),
-    onSurfaceVariant = DarkGray,
-    outline = SoftGray,
-    error = ErrorRed,
+    primaryContainer = Color(0xFFFFF8E1),  // Light gold container
+    onPrimaryContainer = Color(0xFF5D4200),  // Dark brown for text on gold
+
+    // Secondary colors - complementary to primary
+    secondary = Color(0xFF795548),        // Warm brown
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFFFE0B2), // Light peach container
+    onSecondaryContainer = Color(0xFF4E342E), // Dark brown for text
+
+    // Tertiary colors - accent
+    tertiary = Color(0xFF7E57C2),         // Muted purple
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFEDE7F6), // Light purple container
+    onTertiaryContainer = Color(0xFF4527A0), // Dark purple for text
+
+    // Backgrounds
+    background = Color(0xFFFAFAFA),        // Very light gray
+    onBackground = Color(0xFF212121),      // Very dark gray
+    surface = Color(0xFFFFFFFF),           // Pure white
+    onSurface = Color(0xFF212121),         // Very dark gray
+
+    // Surface variants
+    surfaceVariant = Color(0xFFF5F5F5),    // Light gray
+    onSurfaceVariant = Color(0xFF616161),  // Medium-dark gray
+
+    // Other UI elements
+    outline = Color(0xFFBDBDBD),           // Light gray outline
+    outlineVariant = Color(0xFF9E9E9E),    // Slightly darker gray outline
+
+    // Error states
+    error = Color(0xFFB00020),             // Standard Material error red
     onError = Color.White,
-    errorContainer = Color(0xFFFFDAD6),
-    onErrorContainer = Color(0xFF410002)
+    errorContainer = Color(0xFFFFDAD6),    // Light red
+    onErrorContainer = Color(0xFF410002),  // Dark red
+
+    // Scrim and inverse surfaces
+    scrim = Color(0x52000000),             // Semi-transparent black
+    inverseSurface = Color(0xFF121212),    // Very dark gray
+    inverseOnSurface = Color(0xFFFFFFFF),  // White
+
+    // Surface tint color
+    surfaceTint = Color(0xFF9C7C38).copy(alpha = 0.1f) // Slight gold tint
 )
+
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -140,7 +162,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun ProjectHUBTheme(
     themeViewModel: ThemeViewModel,
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

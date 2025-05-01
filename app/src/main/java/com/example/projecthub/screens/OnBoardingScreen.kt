@@ -1,5 +1,6 @@
 package com.example.projecthub.screens
 
+import AppBackground7
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -33,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.R
 import com.example.projecthub.navigation.routes
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.example.projecthub.viewModel.authViewModel
 import kotlinx.coroutines.launch
 
@@ -78,47 +80,15 @@ fun OnBoardingScreen(
 
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val coroutineScope = rememberCoroutineScope()
+    val themeViewModel: ThemeViewModel = viewModel()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .align(Alignment.TopEnd)
-                .offset(x = 50.dp, y = (-30).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-        )
+        AppBackground7(themeViewModel = themeViewModel)
 
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.BottomStart)
-                .offset(x = (-30).dp, y = 30.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.39f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .align(Alignment.CenterStart)
-                .offset(x = (-70).dp, y = (-100).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.40f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .align(Alignment.CenterEnd)
-                .offset(x = (70).dp, y = (40).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.41f))
-        )
 
         Column(
             modifier = Modifier

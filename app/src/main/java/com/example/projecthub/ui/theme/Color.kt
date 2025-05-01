@@ -76,3 +76,10 @@ val SuccessGreen = Color(0xFF4CAF50)
 val WarningAmber = Color(0xFFFF9800)
 val ErrorRed = Color(0xFFE57373)
 val InfoBlue = Color(0xFF64B5F6)
+
+
+
+val FadedYellow = Color(0xFFE8D699)      // Deeper cream color
+val DarkerGray = Color(0xFFB8B8B8)       // Darker soft gray
+val ErrorLight = Color(0xFFFFDAD6)       // Error container
+val ErrorDark = Color(0xFF410002)        // On error container

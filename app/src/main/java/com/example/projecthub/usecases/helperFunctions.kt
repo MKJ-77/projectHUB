@@ -90,7 +90,7 @@ fun bottomNavigationBar(navController: NavHostController, currentRoute: String) 
         NavigationBarItem(
             icon = { Icon(Icons.Default.Assignment, contentDescription = "Assignments",tint = MaterialTheme.colorScheme.secondary) },
             label = { Text("Assignments") },
-            selected = currentRoute == "assignments",
+            selected = currentRoute == "assignments_page",
             onClick = {
                 if (currentRoute != "assignments") {
                     navController.navigate(routes.assignmentsScreen.route) {
@@ -282,37 +282,63 @@ fun updateBidStatus(
     bidId: String,
     status: String,
     context: Context,
-    onSuccess: () -> Unit = {}) {
+    onSuccess: () -> Unit = {}
+) {
     val db = FirebaseFirestore.getInstance()
     val bidRef = db.collection("bids").document(bidId)
+
     bidRef.update("status", status)
         .addOnSuccessListener {
             Toast.makeText(context, "Bid $status", Toast.LENGTH_SHORT).show()
 
-            if (status == "accepted"){
+            if (status == "accepted") {
                 bidRef.get()
-                    .addOnSuccessListener { document->
+                    .addOnSuccessListener { document ->
                         val bid = document.toObject(Bid::class.java)
 
                         bid?.let {
                             val assignmentRef = db.collection("assignments").document(it.assignmentId)
 
-                            assignmentRef.get()
-                                .addOnSuccessListener { assignmentDoc->
-                                    val assignment = assignmentDoc.toObject(Assignment::class.java)
+                            // Update the assignment with acceptedBidderId field
+                            assignmentRef.update(
+                                mapOf(
+                                    "acceptedBidderId" to it.bidderId,
+                                    "acceptedBidAmount" to it.bidAmount,
+                                    "acceptedBidderName" to it.bidderName,
+                                    "status" to "in_progress",
+                                    "expectedCompletionDate" to it.enterCompletionDate
+                                )
+                            ).addOnSuccessListener { _ ->
+                                // Now reject all other bids for this assignment
+                                db.collection("bids")
+                                    .whereEqualTo("assignmentId", it.assignmentId)
+                                    .whereNotEqualTo("id", bidId)
+                                    .get()
+                                    .addOnSuccessListener { otherBids ->
+                                        val batch = db.batch()
+                                        for (bidDoc in otherBids.documents) {
+                                            batch.update(bidDoc.reference, "status", "rejected")
+                                        }
+                                        batch.commit()
+                                    }
 
-                                    assignment?.let { a->
-                                        val posterId = a.createdBy
+                                assignmentRef.get()
+                                    .addOnSuccessListener { assignmentDoc ->
+                                        val assignment = assignmentDoc.toObject(Assignment::class.java)
 
-                                        // Replace createChannel with createOrGetChannel
-                                        createOrGetChannel(
-                                            otherUserId = it.bidderId
-                                        ){ chatChannelId ->
-                                            Toast.makeText(context,"chat created : $chatChannelId",Toast.LENGTH_SHORT).show()
-                                            onSuccess()
+                                        assignment?.let { a ->
+                                            val posterId = a.createdBy
+
+                                            // Create chat channel
+                                            createOrGetChannel(
+                                                otherUserId = it.bidderId
+                                            ) { chatChannelId ->
+                                                Toast.makeText(context, "Chat created: $chatChannelId", Toast.LENGTH_SHORT).show()
+                                                onSuccess()
+                                            }
                                         }
                                     }
-                                }
+                            }
                         }
                     }
             } else {

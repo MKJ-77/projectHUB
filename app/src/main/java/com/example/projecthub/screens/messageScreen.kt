@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.projecthub.data.message
 import com.example.projecthub.usecases.formatTimeStamp
@@ -29,6 +30,7 @@ import com.example.projecthub.usecases.sendMessage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.projecthub.usecases.listenForMessages
+import com.example.projecthub.viewModel.ThemeViewModel
 import com.google.firebase.firestore.ListenerRegistration
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -51,6 +53,7 @@ fun ChatScreen(
     var otherUserId by remember { mutableStateOf("") }
     var otherUserPhotoId by remember { mutableStateOf(com.example.projecthub.R.drawable.profilephoto1) }
     var isLoading by remember { mutableStateOf(true) }
+    val themeViewModel: ThemeViewModel = viewModel()
 
     DisposableEffect(chatChannelId) {
         var listener: ListenerRegistration? = null
