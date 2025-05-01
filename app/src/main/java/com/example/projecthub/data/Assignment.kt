@@ -12,4 +12,8 @@ data class Assignment(
     val createdBy : String = "",
     val timestamp : Timestamp = Timestamp.now(),
     val status : String = "Active",
+    val acceptedBidderId: String? = null,
+    val bidderRating: Int? = null,
+    val completedOn: Timestamp? = null,
+    val completedBy: String? = null
 )

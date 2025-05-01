@@ -88,6 +88,9 @@ fun assignmentDetailScreen(
     var showBidDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val themeViewModel: ThemeViewModel = viewModel()
+    var showRatingDialog by remember { mutableStateOf(false) }
+    var bidderToRate by remember { mutableStateOf("") }
+    var bidderName by remember { mutableStateOf("") }
 
     LaunchedEffect(assignmentId) {
         isLoading = true
@@ -115,6 +118,20 @@ fun assignmentDetailScreen(
             isLoading = false
             navController.popBackStack()
         }
+    }
+    fun getBidderName(bidderId: String, callback: (String) -> Unit) {
+        FirebaseFirestore.getInstance().collection("users").document(bidderId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val name = document.getString("name") ?: "Unknown User"
+                    callback(name)
+                } else {
+                    callback("Unknown User")
+                }
+            }
+            .addOnFailureListener {
+                callback("Unknown User")
+            }
     }
 
     Scaffold(
@@ -150,11 +167,27 @@ fun assignmentDetailScreen(
                     if (currentUserId == assignmentData.createdBy && assignmentData.status != "completed") {
                         Button(
                             onClick = {
-                                markAssignmentCompleted(assignmentData.id ?: "")
+                                val acceptedBidderId = assignmentData.acceptedBidderId
+                                if (acceptedBidderId != null && acceptedBidderId.isNotEmpty()) {
+                                    getBidderName(acceptedBidderId) { name ->
+                                        bidderToRate = acceptedBidderId
+                                        bidderName = name
+                                        showRatingDialog = true
+                                    }
+                                } else {
+                                    markAssignmentCompleted(assignmentData.id ?: "") { assignmentId, acceptedBidderId ->
+                                        getBidderName(acceptedBidderId) { name ->
+                                            bidderToRate = acceptedBidderId
+                                            bidderName = name
+                                            showRatingDialog = true
+                                        }
+                                    }
+                                    Toast.makeText(context, "Assignment marked as completed", Toast.LENGTH_SHORT).show()
+                                }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 16.dp)
+                                .padding(top= 16.dp)
                         ) {
                             Text("Mark as Completed")
                         }
@@ -172,6 +205,7 @@ fun assignmentDetailScreen(
                         budget = assignmentData.budget
                     )
                 }
+
             }
         }
     }

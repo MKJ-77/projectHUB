@@ -1,6 +1,7 @@
 package com.example.projecthub.screens
 
 import AppBackground7
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -64,15 +65,22 @@ fun profileScreen(navController: NavHostController,authViewModel: authViewModel)
                         val skills = document.get("skills") as? List<String> ?: emptyList()
                         val profilePhotoId = document.getLong("profilePhotoId")?.toInt()
                             ?: R.drawable.profilephoto1
+                        val ratingSum = document.getDouble("ratingSum") ?: 0.0
+                        val ratingCount = document.getLong("ratingCount")?.toInt() ?: 0
+                        val averageRating = document.getDouble("averageRating") ?: 0.0
+                        val skillsList = document.get("skills") as? List<String> ?: emptyList()
 
                         userProfile = UserProfile(
-                            name,
-                            bio,
-                            collegeName,
-                            semester,
-                            collegeLocation,
-                            skills,
-                            profilePhotoId
+                            name = name,
+                            bio = bio,
+                            collegeName = collegeName,
+                            semester = semester,
+                            collegeLocation = collegeLocation,
+                            skills = skillsList,
+                            profilePhotoId = profilePhotoId,
+                            ratingSum = ratingSum,
+                            ratingCount = ratingCount,
+                            averageRating = averageRating
                         )
                     }
                 }
@@ -145,7 +153,12 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                ProfileHeader(userProfile.name, userProfile.profilePhotoId)
+                ProfileHeader(
+                    name = userProfile.name,
+                    photoId = userProfile.profilePhotoId,
+                    averageRating = userProfile.averageRating,
+                    ratingCount = userProfile.ratingCount
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -256,8 +269,10 @@ fun ProfileScreenContent(navController: NavHostController, userProfile: UserProf
 }
 
 
+@SuppressLint("DefaultLocale")
 @Composable
-fun ProfileHeader(name: String, photoId: Int) {
+fun ProfileHeader(name: String, photoId: Int,averageRating: Double = 0.0,
+                  ratingCount: Int = 0) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -290,6 +305,57 @@ fun ProfileHeader(name: String, photoId: Int) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ){
+            if(ratingCount > 0){
+                val fullStars = averageRating.toInt()
+                val hasHalfStar = averageRating - fullStars >= 0.5
+
+                repeat(fullStars) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Star",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                if (hasHalfStar) {
+                    Icon(
+                        imageVector = Icons.Default.StarHalf,
+                        contentDescription = "Half Star",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                val remainingStars = 5 - fullStars - (if (hasHalfStar) 1 else 0)
+                repeat(remainingStars) {
+                    Icon(
+                        imageVector = Icons.Default.StarBorder,
+                        contentDescription = "Empty Star",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = String.format("%.1f", averageRating) + " (${ratingCount})",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }else{
+
+                Text(
+                    text = "Not rated yet",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 

@@ -201,13 +201,13 @@ fun assignmentsScreen(
             showDialog = showDialog,
             onDismiss = {
                 showDialog = false
-                assignmentToEdit = null  // Clear the assignment being edited
+                assignmentToEdit = null
             },
             authViewModel = authViewModel,
             existingAssignment = assignmentToEdit,
             onAssignmentCreated = {
                 showDialog = false
-                assignmentToEdit = null  // Clear the assignment being edited
+                assignmentToEdit = null
                 Toast.makeText(
                     context,
                     if (assignmentToEdit != null) "Assignment updated successfully!" else "Assignment created successfully!",
@@ -265,6 +265,8 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
     var selectedStatus by remember { mutableStateOf(assignment.status) }
 
     var showStatusDialog by remember { mutableStateOf(false) }
+    var showRateDialog by remember { mutableStateOf(false) }
+
     if (showBidDialog) {
         PlaceBidDialog(
             assignmentId = assignment.id,
@@ -309,6 +311,26 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
                         Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT)
                             .show()
                         showStatusDialog = false
+                    }
+            }
+        )
+    }
+
+    if (showRateDialog && assignment.acceptedBidderId != null) {
+        RateUserDialog(
+            userIdToRate = assignment.acceptedBidderId,
+            onDismiss = { showRateDialog = false },
+            onRatingSubmitted = { rating ->
+                val db = FirebaseFirestore.getInstance()
+                db.collection("assignments")
+                    .document(assignment.id)
+                    .update("bidderRating", rating)
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Rating submitted successfully", Toast.LENGTH_SHORT).show()
+                        showRateDialog = false
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Failed to submit rating", Toast.LENGTH_SHORT).show()
                     }
             }
         )
@@ -389,7 +411,6 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Dropdown for status
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -416,21 +437,66 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
                     ) {
                         val statuses = listOf("Active", "In Progress", "Completed")
                         statuses.forEach { status ->
+
                             DropdownMenuItem(
                                 text = { Text(status) },
                                 onClick = {
                                     expanded = false
-                                    if (status != selectedStatus) {
+                                    if (status == "Completed") {
+                                        if (assignment.acceptedBidderId != null) {
+                                            showRateDialog = true
+                                            FirebaseFirestore.getInstance().collection("assignments")
+                                                .document(assignment.id)
+                                                .update(mapOf(
+                                                    "status" to status,
+                                                    "bidderRating" to null
+                                                ))
+                                                .addOnSuccessListener {
+                                                    selectedStatus = status
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Status updated to $status",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                                .addOnFailureListener {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Failed to update status",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                        } else {
+                                            FirebaseFirestore.getInstance().collection("assignments")
+                                                .document(assignment.id)
+                                                .update("status", status)
+                                                .addOnSuccessListener {
+                                                    selectedStatus = status
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Status updated to $status",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                                .addOnFailureListener {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Failed to update status",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                        }
+                                    } else {
                                         FirebaseFirestore.getInstance().collection("assignments")
                                             .document(assignment.id)
                                             .update("status", status)
                                             .addOnSuccessListener {
+                                                selectedStatus = status
                                                 Toast.makeText(
                                                     context,
                                                     "Status updated to $status",
                                                     Toast.LENGTH_SHORT
                                                 ).show()
-                                                selectedStatus = status
                                             }
                                             .addOnFailureListener {
                                                 Toast.makeText(
@@ -551,50 +617,6 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
     }
 }
 }
-//    if (showBidDialog) {
-//        PlaceBidDialog(
-//            assignmentId = assignment.id,
-//            budget = assignment.budget,
-//            existingBid = if (hasExistingBid) existingBidData else null,
-//            onDismiss = { showBidDialog = false },
-//            onBidPlaced = {
-//                showBidDialog = false
-//                Toast.makeText(
-//                    context,
-//                    if (hasExistingBid) "Bid updated successfully!" else "Bid placed successfully!",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            }
-//        )
-//    }
-//
-//    if (showBidsListDialog) {
-//        BidsListDialog(
-//            assignmentId = assignment.id,
-//            navController = navController,
-//            onDismiss = { showBidsListDialog = false }
-//        )
-//    }
-//
-//    if (showStatusDialog){
-//        UpdateStatusDialog(
-//            currentStatus = assignment.status,
-//            onDismiss = { showStatusDialog = false},
-//            onStatusSelected = { newStatus->
-//                Firebase.firestore.collection("assignments").document(assignment.id)
-//                    .update("status",newStatus)
-//                    .addOnSuccessListener {
-//                        Toast.makeText(context,"status updated to new Status ${newStatus}",Toast.LENGTH_SHORT).show()
-//                        showStatusDialog = false
-//                    }
-//                    .addOnFailureListener {
-//                        Toast.makeText(context, "Failed to update status", Toast.LENGTH_SHORT).show()
-//                        showStatusDialog = false
-//                    }
-//            }
-//        )
-//    }
-
 
 @Composable
 fun BidsListDialog(assignmentId: String,navController: NavHostController, onDismiss: () -> Unit) {
