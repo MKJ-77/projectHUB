@@ -121,53 +121,54 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {if (isLoading) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Box(
-                            modifier = Modifier
-                                .width(120.dp)
-                                .height(24.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                    RoundedCornerShape(4.dp)
-                                )
-                        )
-                    }
-                } else {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        androidx.compose.foundation.Image(
-                            painter = androidx.compose.ui.res.painterResource(id = otherUserPhotoId),
-                            contentDescription = "Profile photo",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .clickable {
+                title = {
+                    if (isLoading) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(120.dp)
+                                    .height(24.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant,
+                                        RoundedCornerShape(4.dp)
+                                    )
+                            )
+                        }
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = otherUserPhotoId),
+                                contentDescription = "Profile photo",
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        if (otherUserId.isNotEmpty()) {
+                                            navController.navigate("user_profile/${otherUserId}")
+                                        }
+                                    }
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Text(
+                                text = otherUserName,
+                                modifier = Modifier.clickable {
                                     if (otherUserId.isNotEmpty()) {
                                         navController.navigate("user_profile/${otherUserId}")
                                     }
-                                }
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(
-                            text = otherUserName,
-                            modifier = Modifier.clickable {
-                                if (otherUserId.isNotEmpty()) {
-                                    navController.navigate("user_profile/${otherUserId}")
-                                }
-                            },
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                                },
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
-                }
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -193,12 +194,15 @@ fun ChatScreen(
     ) { innerPadding ->
         if (isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding).background(MaterialTheme.colorScheme.surface),///
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(MaterialTheme.colorScheme.surface),///
                 contentAlignment = Alignment.Center
             ) {
 
 //                chatWallpaperBackground(modifier = Modifier.fillMaxSize())
-                ChatWallpaperBackground()
+                ChatWallpaperBackground(themeViewModel = themeViewModel)
 
                 CircularProgressIndicator()
             }
@@ -215,7 +219,7 @@ fun ChatScreen(
                         .background(MaterialTheme.colorScheme.surface)
                 ) {
 
-ChatWallpaperBackground()
+                    ChatWallpaperBackground(themeViewModel = themeViewModel)
                     if (messages.isEmpty()) {
                         Column(
                             modifier = Modifier
@@ -266,11 +270,15 @@ ChatWallpaperBackground()
                         OutlinedTextField(
                             value = messageText,
                             onValueChange = { messageText = it },
-                            placeholder = { Text("Type your message....",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            placeholder = {
+                                Text(
+                                    "Type your message....",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
                             },
-                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 48.dp),
                             shape = RoundedCornerShape(24.dp),
 
                             colors = OutlinedTextFieldDefaults.colors(
@@ -309,6 +317,7 @@ ChatWallpaperBackground()
     }
 
 }
+
 @Composable
 fun MessageBubble(message: message) {
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid

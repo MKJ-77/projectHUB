@@ -518,7 +518,6 @@ fun AssignmentCard(assignment: Assignment, navController: NavHostController, onE
                 color = MaterialTheme.colorScheme.secondary
             )
 
-            // Assignment details
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

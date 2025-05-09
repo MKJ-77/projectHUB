@@ -162,7 +162,7 @@ fun ChangePasswordScreen(
                         OutlinedTextField(
                             value = oldPassword,
                             onValueChange = { oldPassword = it },
-                            label = { Text("Current Password") },
+                            placeholder = { Text("Current Password") },
                             leadingIcon = { Icon(Icons.Default.VpnKey, "Current Password") },
                             trailingIcon = {
                                 IconButton(onClick = { oldPasswordVisible = !oldPasswordVisible }) {
@@ -199,7 +199,7 @@ fun ChangePasswordScreen(
                         OutlinedTextField(
                             value = newPassword,
                             onValueChange = { newPassword = it },
-                            label = { Text("New Password") },
+                            placeholder = { Text("New Password") },
                             leadingIcon = { Icon(Icons.Default.Lock, "New Password") },
                             trailingIcon = {
                                 IconButton(onClick = { newPasswordVisible = !newPasswordVisible }) {
@@ -248,7 +248,7 @@ fun ChangePasswordScreen(
                         OutlinedTextField(
                             value = confirmPassword,
                             onValueChange = { confirmPassword = it },
-                            label = { Text("Confirm New Password") },
+                            placeholder = { Text("Confirm New Password") },
                             leadingIcon = { Icon(Icons.Default.Lock, "Confirm Password") },
                             trailingIcon = {
                                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {

@@ -203,7 +203,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Full Name*") },
+                        placeholder = { Text("Full Name*") },
                         leadingIcon = { Icon(Icons.Default.Person, "Name") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -249,7 +249,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                                         if (newWordList.size >= maxBioWords) newText.trimEnd() else newText
                                 }
                             },
-                            label = {
+                            placeholder = {
                                 Row() {
                                     Text("Bio")
                                     Text(
@@ -291,7 +291,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                     OutlinedTextField(
                         value = collegeName,
                         onValueChange = { collegeName = it },
-                        label = { Text("College Name*") },
+                        placeholder = { Text("College Name*") },
                         leadingIcon = { Icon(Icons.Default.School, "College") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -326,7 +326,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                             value = semester,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Current Semester*") },
+                            placeholder = { Text("Current Semester*") },
                             leadingIcon = { Icon(Icons.Default.DateRange, "Semester") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                             modifier = Modifier
@@ -375,7 +375,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                     OutlinedTextField(
                         value = collegeLocation,
                         onValueChange = { collegeLocation = it },
-                        label = { Text("College Location*") },
+                        placeholder = { Text("College Location*") },
                         leadingIcon = { Icon(Icons.Default.LocationOn, "Location") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -414,7 +414,7 @@ fun ProfileSetupScreen(navController: NavHostController,authViewModel: authViewM
                         OutlinedTextField(
                             value = skill,
                             onValueChange = { skill = it },
-                            label = { Text("Add Skill") },
+                            placeholder = { Text("Add Skill") },
                             leadingIcon = { Icon(Icons.Default.Code, "Skills") },
                             modifier = Modifier
                                 .weight(1f)
