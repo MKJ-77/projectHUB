@@ -225,16 +225,10 @@ fun CreateAssignmentFAB(onClick: () -> Unit) {
     }
 }
 
-//fun formatTimestamp(timestamp: Timestamp): String {
-//    val sdf = java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a", java.util.Locale.getDefault())
-//    return sdf.format(timestamp.toDate())
-//}
-
 fun formatTimestamp(timestamp: Timestamp): String {
     val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     return sdf.format(timestamp.toDate())
 }
-// Fix the formatTimeStamp function - Date objects don't have a toDate() method
 fun formatTimeStamp(date: Date): String {
     val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     return sdf.format(date)
@@ -277,7 +271,6 @@ fun NoChannelsMessage(modifier: Modifier = Modifier) {
         )
     }
 }
-// In updateBidStatus function, replace createChannel with createOrGetChannel
 fun updateBidStatus(
     bidId: String,
     status: String,
@@ -299,7 +292,6 @@ fun updateBidStatus(
                         bid?.let {
                             val assignmentRef = db.collection("assignments").document(it.assignmentId)
 
-                            // Update the assignment with acceptedBidderId field
                             assignmentRef.update(
                                 mapOf(
                                     "acceptedBidderId" to it.bidderId,
@@ -309,7 +301,6 @@ fun updateBidStatus(
                                     "expectedCompletionDate" to it.enterCompletionDate
                                 )
                             ).addOnSuccessListener { _ ->
-                                // Now reject all other bids for this assignment
                                 db.collection("bids")
                                     .whereEqualTo("assignmentId", it.assignmentId)
                                     .whereNotEqualTo("id", bidId)
@@ -329,7 +320,6 @@ fun updateBidStatus(
                                         assignment?.let { a ->
                                             val posterId = a.createdBy
 
-                                            // Create chat channel
                                             createOrGetChannel(
                                                 otherUserId = it.bidderId
                                             ) { chatChannelId ->
@@ -357,27 +347,22 @@ fun createOrGetChannel(
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val chatChannelsRef = db.collection("chatChannels")
 
-    // Query where current user is user1 and other is user2
     val query1 = chatChannelsRef
         .whereEqualTo("user1Id", currentUserId)
         .whereEqualTo("user2Id", otherUserId)
 
-    // Query where current user is user2 and other is user1
     val query2 = chatChannelsRef
         .whereEqualTo("user1Id", otherUserId)
         .whereEqualTo("user2Id", currentUserId)
 
-    // First try to find existing channel
     query1.get().addOnSuccessListener { querySnapshot ->
         if (!querySnapshot.isEmpty) {
             onChannelCreated(querySnapshot.documents[0].id)
         } else {
-            // If not found in first query, try second
             query2.get().addOnSuccessListener { querySnapshot2 ->
                 if (!querySnapshot2.isEmpty) {
                     onChannelCreated(querySnapshot2.documents[0].id)
                 } else {
-                    // Create new channel if none exists
                     val newChannel = chatChannel(
                         user1Id = currentUserId,
                         user2Id = otherUserId
@@ -406,10 +391,8 @@ fun sendMessage(
         text = messageText
     )
 
-    // Add the message to the messages subcollection
     messageRef.set(message)
         .addOnSuccessListener {
-            // Also update the channel with last message info
             db.collection("chatChannels").document(chatChannelId)
                 .update(
                     mapOf(

@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -29,7 +28,6 @@ fun RateUserDialog(
     var userName by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    // Fetch user name
     LaunchedEffect(userIdToRate) {
         FirebaseFirestore.getInstance().collection("users")
             .document(userIdToRate)
